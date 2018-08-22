@@ -262,6 +262,163 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/22/MySQL数据类型补充/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/22/MySQL数据类型补充/" itemprop="url">MySQL数据类型补充</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-22T23:03:00+08:00">
+                2018-08-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>我们知道，使用varchar类型存储时，需要使用1或2个字节记录字符串的长度：如果列的最大长度小于或等于255字节，则只使用一个字节表示，否则使用两个字节。</p>
+<p>==假设一下描述使用的都是UTF-8编码，存入英文字符。==</p>
+<p>即varchar(255)使用了256个字节，而varchar(256)则使用了258个字节。</p>
+<p>那么问题来了，我们在设计表的时候，如果不确定字段的最大长度，使用了变长字符串varchar类型，那么是不是不管三七二十一直接上varchar(255)呢（假设最大长度不超过255），按照之前的理论，varchar(10)和varchar(255)存储“hello”的空间开销都是一样的，即都是使用了5个字符的硬盘存储空间，但这个数据加载到内存的时候，就会使用固定大小的内存块来保存值。简单来说，就是两种方式在硬盘中存储空间开销并无二致，但在内存中就大有不同。</p>
+<p>varchar(10)在内存中使用10个字符的内存空间，varchar(255)在内存中使用255个字符的内存空间。这对于排序或者临时表（需要通过内存操作来实现）作业会产生比较大的不利影响。</p>
+<p>所以如果某些字段会涉及到文件排序或者基于磁盘的临时表时，分配VARCHAR数据类型时仍然不能够太过于慷慨。还是要评估实际需要的长度，然后选择一个最长的字段来设置字符长度。如果为了考虑冗余，可以留10%左右的字符长度。千万不能认为其为根据实际长度来分配存储空间，而随意的分配长度，或者说干脆使用最大的字符长度。</p>
+<p>另一个问题：varchar的允许的最大字节长度是65535字节，那么varchar(?)这个？最大能是多少呢。</p>
+<ul>
+<li>非空字段时：最大可以到65533,2个字节用于记录字符串长度</li>
+<li>可空字段：最大可以到65532，2个字节用于记录字符串长度，一个字节用于及记录 null 值。</li>
+</ul>
+<p>以上的结论是以UTF-8编码及全部存入英文字符为前提的理想状态，但实际上使用UTF-8时，varchar(?)到不了65532那么大，因为一个字符最大占用三个字节，MySQL默认存入以最大字节数来计算。</p>
+<p>所以最大到达21844，21845*3=65535字节，虽然符合最大字节限制，但没有空间存放字符串长度的记录了。</p>
+<p>查看数据库默认字符集<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &apos;character_set_database&apos;;</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| Variable_name          | Value |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| character_set_database | utf8  |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">1 row in set (0.01 sec)</span><br></pre></td></tr></table></figure></p>
+<p>将varchar设置为21844,创建成功<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create table test_varchar(v1 varchar(21844));</span><br><span class="line">Query OK, 0 rows affected (0.03 sec)</span><br></pre></td></tr></table></figure></p>
+<p>大于21844则报错<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; mysql&gt; create table &gt; create table test_varchar(v1 varchar(65535))&apos; at line 1</span><br><span class="line">mysql&gt; create table test_varchar(v1 varchar(65535));</span><br><span class="line">ERROR 1074 (42000): Column length too big for column &apos;v1&apos; (max = 21845); use BLOB or TEXT instead</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mysql&gt; create table test_varchar(v1 varchar(21845));</span><br><span class="line">ERROR 1118 (42000): Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535. This includes storage overhead, check the manual. You have to change some columns to TEXT or BLOBs</span><br></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/16/ssh-登陆遇到-Host-key-verification-failed/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -465,8 +622,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mysql/" itemprop="url" rel="index">
-                    <span itemprop="name">Mysql</span>
+                  <a href="/categories/MySQL/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL</span>
                   </a>
                 </span>
 
@@ -752,7 +909,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

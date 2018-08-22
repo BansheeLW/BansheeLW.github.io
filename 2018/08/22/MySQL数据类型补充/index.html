@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="ssh," />
+  <meta name="keywords" content="MySQL 数据类型," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="ssh 登陆时，遇到 host key verifycation failed 的情况12345678910111213@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @@@@@@@@@@@@@@@@@@@@@@@">
-<meta name="keywords" content="ssh">
+<meta name="description" content="我们知道，使用varchar类型存储时，需要使用1或2个字节记录字符串的长度：如果列的最大长度小于或等于255字节，则只使用一个字节表示，否则使用两个字节。 ==假设一下描述使用的都是UTF-8编码，存入英文字符。== 即varchar(255)使用了256个字节，而varchar(256)则使用了258个字节。 那么问题来了，我们在设计表的时候，如果不确定字段的最大长度，使用了变长字符串varc">
+<meta name="keywords" content="MySQL 数据类型">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ssh 登陆遇到 Host key verification failed">
-<meta property="og:url" content="http://yoursite.com/2018/07/16/ssh-登陆遇到-Host-key-verification-failed/index.html">
+<meta property="og:title" content="MySQL数据类型补充">
+<meta property="og:url" content="http://yoursite.com/2018/08/22/MySQL数据类型补充/index.html">
 <meta property="og:site_name" content="厦门鱼肝油厂">
-<meta property="og:description" content="ssh 登陆时，遇到 host key verifycation failed 的情况12345678910111213@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @@@@@@@@@@@@@@@@@@@@@@@">
+<meta property="og:description" content="我们知道，使用varchar类型存储时，需要使用1或2个字节记录字符串的长度：如果列的最大长度小于或等于255字节，则只使用一个字节表示，否则使用两个字节。 ==假设一下描述使用的都是UTF-8编码，存入英文字符。== 即varchar(255)使用了256个字节，而varchar(256)则使用了258个字节。 那么问题来了，我们在设计表的时候，如果不确定字段的最大长度，使用了变长字符串varc">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-07-16T12:44:45.892Z">
+<meta property="og:updated_time" content="2018-08-22T15:04:27.359Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ssh 登陆遇到 Host key verification failed">
-<meta name="twitter:description" content="ssh 登陆时，遇到 host key verifycation failed 的情况12345678910111213@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @@@@@@@@@@@@@@@@@@@@@@@">
+<meta name="twitter:title" content="MySQL数据类型补充">
+<meta name="twitter:description" content="我们知道，使用varchar类型存储时，需要使用1或2个字节记录字符串的长度：如果列的最大长度小于或等于255字节，则只使用一个字节表示，否则使用两个字节。 ==假设一下描述使用的都是UTF-8编码，存入英文字符。== 即varchar(255)使用了256个字节，而varchar(256)则使用了258个字节。 那么问题来了，我们在设计表的时候，如果不确定字段的最大长度，使用了变长字符串varc">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/07/16/ssh-登陆遇到-Host-key-verification-failed/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/08/22/MySQL数据类型补充/"/>
 
 
 
 
 
-  <title>ssh 登陆遇到 Host key verification failed | 厦门鱼肝油厂</title>
+  <title>MySQL数据类型补充 | 厦门鱼肝油厂</title>
   
 
 
@@ -263,7 +263,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/16/ssh-登陆遇到-Host-key-verification-failed/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/22/MySQL数据类型补充/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="BansheeLW">
@@ -280,7 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">ssh 登陆遇到 Host key verification failed</h1>
+          <h1 class="post-title" itemprop="name headline">MySQL数据类型补充</h1>
         
 
         <div class="post-meta">
@@ -292,8 +292,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-16T20:42:27+08:00">
-                2018-07-16
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-22T23:03:00+08:00">
+                2018-08-22
               </time>
             
 
@@ -315,8 +315,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/其他/" itemprop="url" rel="index">
-                    <span itemprop="name">其他</span>
+                  <a href="/categories/MySQL/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL</span>
                   </a>
                 </span>
 
@@ -352,14 +352,22 @@
       
 
       
-        <p>ssh 登陆时，遇到 host key verifycation failed 的情况<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!</span><br><span class="line">Someone could be eavesdropping on you right now (man-in-the-middle attack)!</span><br><span class="line">It is also possible that a host key has just been changed.</span><br><span class="line">The fingerprint for the ECDSA key sent by the remote host is</span><br><span class="line">SHA256:MU0btYHPprmjRMfcs6mtciH407u1hCJzz71wG7EuUUE.</span><br><span class="line">Please contact your system administrator.</span><br><span class="line">Add correct host key in /Users/banshee/.ssh/known_hosts to get rid of this message.</span><br><span class="line">Offending ECDSA key in /Users/banshee/.ssh/known_hosts:12</span><br><span class="line">ECDSA host key for [xxx.xxx.xxx.xx]:xxxx has changed and you have requested strict checking.</span><br><span class="line">Host key verification failed.</span><br></pre></td></tr></table></figure></p>
-<p>出现这种情况的原因是，第一次 SSH 连接服务器时，会生成一个公钥，存储在客户端的 known_ host 文件里。而我的服务器重装了系统，生成了新的公钥，而客户端known_hsot 里还保存着旧的公钥。所以会出现以上错误。</p>
-<p>解决方式也很简单：</p>
+        <p>我们知道，使用varchar类型存储时，需要使用1或2个字节记录字符串的长度：如果列的最大长度小于或等于255字节，则只使用一个字节表示，否则使用两个字节。</p>
+<p>==假设一下描述使用的都是UTF-8编码，存入英文字符。==</p>
+<p>即varchar(255)使用了256个字节，而varchar(256)则使用了258个字节。</p>
+<p>那么问题来了，我们在设计表的时候，如果不确定字段的最大长度，使用了变长字符串varchar类型，那么是不是不管三七二十一直接上varchar(255)呢（假设最大长度不超过255），按照之前的理论，varchar(10)和varchar(255)存储“hello”的空间开销都是一样的，即都是使用了5个字符的硬盘存储空间，但这个数据加载到内存的时候，就会使用固定大小的内存块来保存值。简单来说，就是两种方式在硬盘中存储空间开销并无二致，但在内存中就大有不同。</p>
+<p>varchar(10)在内存中使用10个字符的内存空间，varchar(255)在内存中使用255个字符的内存空间。这对于排序或者临时表（需要通过内存操作来实现）作业会产生比较大的不利影响。</p>
+<p>所以如果某些字段会涉及到文件排序或者基于磁盘的临时表时，分配VARCHAR数据类型时仍然不能够太过于慷慨。还是要评估实际需要的长度，然后选择一个最长的字段来设置字符长度。如果为了考虑冗余，可以留10%左右的字符长度。千万不能认为其为根据实际长度来分配存储空间，而随意的分配长度，或者说干脆使用最大的字符长度。</p>
+<p>另一个问题：varchar的允许的最大字节长度是65535字节，那么varchar(?)这个？最大能是多少呢。</p>
 <ul>
-<li>使用命令<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -R xx.xx.xx.xx:pp(IP:PORT)</span><br></pre></td></tr></table></figure>
-</li>
+<li>非空字段时：最大可以到65533,2个字节用于记录字符串长度</li>
+<li>可空字段：最大可以到65532，2个字节用于记录字符串长度，一个字节用于及记录 null 值。</li>
 </ul>
-<p>或者直接vim 进去删除服务器IP对应的记录。<br>再次连接，会出现接受服务器公钥的询问，输入 yes 即可。</p>
+<p>以上的结论是以UTF-8编码及全部存入英文字符为前提的理想状态，但实际上使用UTF-8时，varchar(?)到不了65532那么大，因为一个字符最大占用三个字节，MySQL默认存入以最大字节数来计算。</p>
+<p>所以最大到达21844，21845*3=65535字节，虽然符合最大字节限制，但没有空间存放字符串长度的记录了。</p>
+<p>查看数据库默认字符集<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &apos;character_set_database&apos;;</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| Variable_name          | Value |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| character_set_database | utf8  |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">1 row in set (0.01 sec)</span><br></pre></td></tr></table></figure></p>
+<p>将varchar设置为21844,创建成功<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create table test_varchar(v1 varchar(21844));</span><br><span class="line">Query OK, 0 rows affected (0.03 sec)</span><br></pre></td></tr></table></figure></p>
+<p>大于21844则报错<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; mysql&gt; create table &gt; create table test_varchar(v1 varchar(65535))&apos; at line 1</span><br><span class="line">mysql&gt; create table test_varchar(v1 varchar(65535));</span><br><span class="line">ERROR 1074 (42000): Column length too big for column &apos;v1&apos; (max = 21845); use BLOB or TEXT instead</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mysql&gt; create table test_varchar(v1 varchar(21845));</span><br><span class="line">ERROR 1118 (42000): Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535. This includes storage overhead, check the manual. You have to change some columns to TEXT or BLOBs</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -377,7 +385,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/ssh/" rel="tag"># ssh</a>
+            <a href="/tags/MySQL-数据类型/" rel="tag"># MySQL 数据类型</a>
           
         </div>
       
@@ -390,8 +398,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/06/12/高性能Mysql之数据类型优化/" rel="next" title="高性能Mysql之数据类型优化">
-                <i class="fa fa-chevron-left"></i> 高性能Mysql之数据类型优化
+              <a href="/2018/07/16/ssh-登陆遇到-Host-key-verification-failed/" rel="next" title="ssh 登陆遇到 Host key verification failed">
+                <i class="fa fa-chevron-left"></i> ssh 登陆遇到 Host key verification failed
               </a>
             
           </div>
@@ -399,10 +407,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/08/22/MySQL数据类型补充/" rel="prev" title="MySQL数据类型补充">
-                MySQL数据类型补充 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
