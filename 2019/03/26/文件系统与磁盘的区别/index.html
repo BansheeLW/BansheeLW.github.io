@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Linux 文件系统 磁盘," />
 
 
 
@@ -79,16 +79,18 @@
 
 
 
-<meta name="description" content="太阳落山了，我是你的渔船，你的锚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="厦门鱼肝油厂">
-<meta property="og:url" content="http://yoursite.com/archives/2018/06/index.html">
+<meta name="description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
+<meta name="keywords" content="Linux 文件系统 磁盘">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件系统与磁盘的区别">
+<meta property="og:url" content="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/index.html">
 <meta property="og:site_name" content="厦门鱼肝油厂">
-<meta property="og:description" content="太阳落山了，我是你的渔船，你的锚">
+<meta property="og:description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-03-26T04:03:44.185Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="厦门鱼肝油厂">
-<meta name="twitter:description" content="太阳落山了，我是你的渔船，你的锚">
+<meta name="twitter:title" content="文件系统与磁盘的区别">
+<meta name="twitter:description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
 
 
 
@@ -118,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/archives/2018/06/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/"/>
 
 
 
 
 
-  <title>归档 | 厦门鱼肝油厂</title>
+  <title>文件系统与磁盘的区别 | 厦门鱼肝油厂</title>
   
 
 
@@ -143,7 +145,7 @@
     
   
 
-  <div class="container sidebar-position-right page-archive">
+  <div class="container sidebar-position-right page-post-detail">
     <div class="headband"></div>
           <a href="https://github.com/BansheeLW"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_green_007200.png" alt="Fork me on GitHub"></a>
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -247,111 +249,182 @@
           <div id="content" class="content">
             
 
+  <div id="posts" class="posts-expand">
+    
+
+  
+
   
   
   
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
-
-      <span class="archive-page-counter">
-        
-        
-        
-          
-        
-        嗯..! 目前共计 5 篇日志。 继续努力。
-      </span>
-
-      
-
-        
-        
-        
-
-        
-          
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2018">2018</h1>
-          </div>
-        
-        
-
-        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2018/06/12/高性能Mysql之数据类型优化/" itemprop="url">
-              
-                <span itemprop="name">高性能Mysql之数据类型优化</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">文件系统与磁盘的区别</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-06-12T22:46:20+08:00"
-              content="2018-06-12" >
-          06-12
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-26T12:01:34+08:00">
+                2019-03-26
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/06/09/mac-挂在ntfs-移动硬盘/" itemprop="url">
-              
-                <span itemprop="name">mac 挂在ntfs 移动硬盘</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-06-09T17:40:18+08:00"
-              content="2018-06-09" >
-          06-09
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
+      
+        <p>磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。</p>
+<p>磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。</p>
+<p>Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,close等）</p>
+<ul>
+<li>我们常说的“文件”，其实指的是普通文件</li>
+<li>而磁盘或者分区，则是指块设备文件</li>
+</ul>
+<p>在读写普通文件时，I/O请求会首先通过文件系统，然后有文件系统负责与磁盘进行交互。而在读写块设备时，会跳过文件系统，直接与磁盘交互，即所谓的“裸I/O”。</p>
+<p>这两种读写方式使用的缓存自然不同。文件系统管理的缓存，其实就是Cache的一部分。而裸磁盘的缓存，用的是Buffer.</p>
+<p>用ls -l命令查看 /dev 目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//块设备文件</span><br><span class="line">-Port</span><br><span class="line">brw-r-----  1 root     operator         1,   0  2 13 10:13 disk0</span><br><span class="line"></span><br><span class="line">//字符设备文件</span><br><span class="line">crw-------  1 root     wheel           18,   1  3 25 10:28 afsc_type5</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>b（block） 表示块设备文件，一般置于/dev目录下，一次传输数据为一整块的设备，如硬盘、光盘。最小数据传输单位为一个数据块（通常一个数据块的大小为 512 字节）</li>
+<li>c (character)字符设备文件，一般置于/dev目录下，一次传输一个字节的设备，如字符终端，键盘等，传输数据的最小单位为一个字节。</li>
+</ul>
+
+      
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux-文件系统-磁盘/" rel="tag"># Linux 文件系统 磁盘</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/22/MySQL数据类型补充/" rel="next" title="MySQL数据类型补充">
+                <i class="fa fa-chevron-left"></i> MySQL数据类型补充
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -359,6 +432,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -584,6 +661,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
