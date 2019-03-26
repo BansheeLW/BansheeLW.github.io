@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Linux 文件系统 磁盘," />
+  <meta name="keywords" content="Linux 软中断," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
-<meta name="keywords" content="Linux 文件系统 磁盘">
+<meta name="description" content="中断：中断是系统用来响应硬件设备请求的一种机制，它会打断进程的正常执行和调度，然后调用内核中的中断处理程序来响应设备的请求。 中断的形象化描述：取外卖场景  1.中断是一种异步的事件处理机制，能提高系统的并发处理能力  2.为了减少对正常进程运行进行影响，中断处理程序需要尽快运行  3.中断分为，上下两个部分 (1)上半部用来快速处理中断，在中断禁止模式下，主要处理跟硬件紧密相关的或时间敏感的工作">
+<meta name="keywords" content="Linux 软中断">
 <meta property="og:type" content="article">
-<meta property="og:title" content="文件系统与磁盘的区别">
-<meta property="og:url" content="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/index.html">
+<meta property="og:title" content="理解Linux软中断">
+<meta property="og:url" content="http://yoursite.com/2019/03/26/理解Linux软中断/index.html">
 <meta property="og:site_name" content="厦门鱼肝油厂">
-<meta property="og:description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
+<meta property="og:description" content="中断：中断是系统用来响应硬件设备请求的一种机制，它会打断进程的正常执行和调度，然后调用内核中的中断处理程序来响应设备的请求。 中断的形象化描述：取外卖场景  1.中断是一种异步的事件处理机制，能提高系统的并发处理能力  2.为了减少对正常进程运行进行影响，中断处理程序需要尽快运行  3.中断分为，上下两个部分 (1)上半部用来快速处理中断，在中断禁止模式下，主要处理跟硬件紧密相关的或时间敏感的工作">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-26T04:03:44.185Z">
+<meta property="og:updated_time" content="2019-03-26T06:52:00.118Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="文件系统与磁盘的区别">
-<meta name="twitter:description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
+<meta name="twitter:title" content="理解Linux软中断">
+<meta name="twitter:description" content="中断：中断是系统用来响应硬件设备请求的一种机制，它会打断进程的正常执行和调度，然后调用内核中的中断处理程序来响应设备的请求。 中断的形象化描述：取外卖场景  1.中断是一种异步的事件处理机制，能提高系统的并发处理能力  2.为了减少对正常进程运行进行影响，中断处理程序需要尽快运行  3.中断分为，上下两个部分 (1)上半部用来快速处理中断，在中断禁止模式下，主要处理跟硬件紧密相关的或时间敏感的工作">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/03/26/理解Linux软中断/"/>
 
 
 
 
 
-  <title>文件系统与磁盘的区别 | 厦门鱼肝油厂</title>
+  <title>理解Linux软中断 | 厦门鱼肝油厂</title>
   
 
 
@@ -263,7 +263,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/26/理解Linux软中断/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="BansheeLW">
@@ -280,7 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">文件系统与磁盘的区别</h1>
+          <h1 class="post-title" itemprop="name headline">理解Linux软中断</h1>
         
 
         <div class="post-meta">
@@ -292,7 +292,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-26T12:01:34+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-26T14:51:07+08:00">
                 2019-03-26
               </time>
             
@@ -352,19 +352,30 @@
       
 
       
-        <p>磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。</p>
-<p>磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。</p>
-<p>Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,close等）</p>
+        <p>中断：中断是系统用来响应硬件设备请求的一种机制，它会打断进程的正常执行和调度，然后调用内核中的中断处理程序来响应设备的请求。</p>
+<p>中断的形象化描述：取外卖场景</p>
+<p> 1.中断是一种异步的事件处理机制，能提高系统的并发处理能力</p>
+<p> 2.为了减少对正常进程运行进行影响，中断处理程序需要尽快运行</p>
+<p> 3.中断分为，上下两个部分</p>
+<pre><code>(1)上半部用来快速处理中断，在中断禁止模式下，主要处理跟硬件紧密相关的或时间敏感的工作
+(2)下半部用来延迟处理上半部未完成的工作，通常以内核线程的方式运行。
+</code></pre><p>小结:</p>
 <ul>
-<li>我们常说的“文件”，其实指的是普通文件</li>
-<li>而磁盘或者分区，则是指块设备文件</li>
+<li>上半部直接处理硬件请求，即硬中断，特点是快速执行</li>
+<li>下半部由内核触发，即软中断，特点是延迟执行</li>
 </ul>
-<p>在读写普通文件时，I/O请求会首先通过文件系统，然后有文件系统负责与磁盘进行交互。而在读写块设备时，会跳过文件系统，直接与磁盘交互，即所谓的“裸I/O”。</p>
-<p>这两种读写方式使用的缓存自然不同。文件系统管理的缓存，其实就是Cache的一部分。而裸磁盘的缓存，用的是Buffer.</p>
-<p>用ls -l命令查看 /dev 目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//块设备文件</span><br><span class="line">-Port</span><br><span class="line">brw-r-----  1 root     operator         1,   0  2 13 10:13 disk0</span><br><span class="line"></span><br><span class="line">//字符设备文件</span><br><span class="line">crw-------  1 root     wheel           18,   1  3 25 10:28 afsc_type5</span><br></pre></td></tr></table></figure></p>
+<p>实际上，上半部会打断CPU正在执行的任务，然后立即执行终端处理程序。而下半部分以内核线程的方式执行，并且每个CPU都对应一个软中断内核线程，名为“ksoftirq/cpu编号”。</p>
+<p>软中断除了硬件设备中断处理程序的下半部分，还包括一些内核自定义的事件，如:内核调度RCU锁</p>
+<p> 4.proc文件系统是一种内核空间和用户空间进行通信的机制，可以用来查看内核的数据结构或者用来动态修改内核配置，如:</p>
 <ul>
-<li>b（block） 表示块设备文件，一般置于/dev目录下，一次传输数据为一整块的设备，如硬盘、光盘。最小数据传输单位为一个数据块（通常一个数据块的大小为 512 字节）</li>
-<li>c (character)字符设备文件，一般置于/dev目录下，一次传输一个字节的设备，如字符终端，键盘等，传输数据的最小单位为一个字节。</li>
+<li>/proc/softirqs提供软中断的运行情况</li>
+<li>/proc/interrupts提供硬中断的运行情况</li>
+</ul>
+<h4 id="辅助案例加深理解"><a href="#辅助案例加深理解" class="headerlink" title="辅助案例加深理解"></a>辅助案例加深理解</h4><h5 id="例子-网卡接收数据包"><a href="#例子-网卡接收数据包" class="headerlink" title="例子:网卡接收数据包"></a>例子:网卡接收数据包</h5><p>网卡接收到数据包后，会通过硬件中断的方式，通知内核有新的数据到了。这时，内核就会调用中断处理程序来响应它。</p>
+<p>在这个案例中，上半部和下半部负责的工作：</p>
+<ul>
+<li>上半部：既然是快速处理，其实就是要把网卡的数据读到内存中，然后更新一下硬件寄存器的状态（表示数据已经读好了），最后再发送一个软中断信息，通知下半部做进一步处理了。</li>
+<li>下半部：被软中断唤醒后，需要从内存中找到网络数据，再按照网络协议栈，对数据进程逐层解析和处理，直到把它送给应用程序。</li>
 </ul>
 
       
@@ -383,7 +394,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Linux-文件系统-磁盘/" rel="tag"># Linux 文件系统 磁盘</a>
+            <a href="/tags/Linux-软中断/" rel="tag"># Linux 软中断</a>
           
         </div>
       
@@ -396,8 +407,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/08/22/MySQL数据类型补充/" rel="next" title="MySQL数据类型补充">
-                <i class="fa fa-chevron-left"></i> MySQL数据类型补充
+              <a href="/2019/03/26/文件系统与磁盘的区别/" rel="next" title="文件系统与磁盘的区别">
+                <i class="fa fa-chevron-left"></i> 文件系统与磁盘的区别
               </a>
             
           </div>
@@ -405,10 +416,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/03/26/理解Linux软中断/" rel="prev" title="理解Linux软中断">
-                理解Linux软中断 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -460,8 +467,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -525,6 +541,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#辅助案例加深理解"><span class="nav-number">1.</span> <span class="nav-text">辅助案例加深理解</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#例子-网卡接收数据包"><span class="nav-number">1.1.</span> <span class="nav-text">例子:网卡接收数据包</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
