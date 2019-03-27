@@ -262,6 +262,204 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/27/CPU上下文切换/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/03/27/CPU上下文切换/" itemprop="url">CPU上下文切换</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-27T14:54:05+08:00">
+                2019-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>多个进程竞争CPU的时候并没有真正运行，为什么还会导致系统负载的升高呢？CPU上下文切换就是罪魁祸首</p>
+<p>Linux是个多任务操作系统，多个任务并发执行并不是同时执行，而是系统将CPU轮流分配给这些任务，造成多任务同时运行的错觉。</p>
+<p>而每个任务运行前，CPU需要知道任务从哪里加载，又从哪里开始运行，也就是说，需要系统帮他设置好CPU寄存器和程序计数器，他们都是CPU在运行任何任务之前，必须的依赖环境，因此也被叫做CPU上下文。</p>
+<p>CPU上下文切换，就是把前一个CPU的上下文（CPU寄存器和程序计数器）保存起来，然后加载新任务的上下文到这些寄存器和程序计数器，最后再跳转到程序计数器所指向的新位置，开始运行新的任务。</p>
+<p>而这些保存起来的上下文，会存储在系统内核中，并在任务重新调度执行时再次加载进来，这样就能保证任务原来的状态不受影响，让任务看起来是连续运行的。</p>
+<blockquote>
+<p>操作系统管理的这些“任务”到底是什么？</p>
+</blockquote>
+<p>任务就只是进程或线程吗？其实不止，硬件通过触发信号，会导致中断处理程序的调用，这也是一种常见的任务。</p>
+<p>所以，根据任务的不同，CPU上下文切换可以分为几个不同的场景：</p>
+<ul>
+<li>进程上下文切换</li>
+<li>线程上下文切换</li>
+<li>中断上下文切换</li>
+</ul>
+<h4 id="进程上下文切换"><a href="#进程上下文切换" class="headerlink" title="进程上下文切换"></a>进程上下文切换</h4><p>Linux按照特权等级，把进程的运行空间分为内核空间和用户空间</p>
+<ul>
+<li>内核空间（Ring 0)具有最高权限，可以直接访问所有资源；</li>
+<li>用户空间（Ring 3) 只能访问受限资源，不能访问内存等硬件设备，必须通过系统调用陷入内核中，才能访问这些特权资源。</li>
+</ul>
+<p>系统调用过程中，发生了CPU上下文切换（CPU寄存器里原来用户态的指令，需要先保存起来。接着，为了执行内核态代码，CPU寄存器需要更新为内核态指令的新位置，最后才是跳转到内核态运行内核任务。而系统调用结束后，CPU寄存器需要回复原来保存的用户态，然后再切换到用户空间，继续运行。所以，一次系统调用发生了两次CPU上下文切换）</p>
+<blockquote>
+<p>那么，进程上下文切换与系统调用又有什么区别呢？</p>
+</blockquote>
+<p>进程是由内核来管理和调度的，进程的切换只能发生在内核态。所以，进程的上下文仅包括了虚拟内存、栈、全局变量等用户空间的资源，还包括了内核堆栈、寄存器等内核空间的状态。</p>
+<p>因此，进程的上下文切换就比系统调用多了一步：在保存当前进程的内核状态和寄存器之前，需要先把该进程的虚拟内存、栈等保存下来；而加载了下一进程的内核态后，还需要刷新进程的虚拟内存和用户态。</p>
+<p>进程上下文的频繁切换，导致CPU将大量的时间耗费在寄存器、内核栈以及虚拟内存等资源的保护和恢复上，进而大大缩短了真正运行进程的时间。</p>
+<blockquote>
+<p>什么时候才会发生进程上下文切换？</p>
+</blockquote>
+<p>进程切换时才需要切换进程上下文（即只有在进程调度时，才需要切换进程上下文）</p>
+<p>Liunx为每个CPU都维护了一个就绪队列，将活跃进程（也就是正在运行和正在等待CPU的进程）按照优先级及等待CPU的时间排序，然后选择最需要CPU的进程，也就是优先级最高和等待CPU时间最长的进程来运行。</p>
+<blockquote>
+<p>进程在什么时候才会被调度到CPU上运行？</p>
+</blockquote>
+<ul>
+<li>进程执行完终止，它占用的CPU资源会被释放，从就绪队列出拿出一个新进程过来运行</li>
+<li>为了保证所有进程都能得到公平调度，CPU时间被划分为一段段的时间片，这些时间片再被轮流分配给各个进程。这样，当某个进程的时间片耗尽，就会被系统挂起，切换到其它正在等待CPU运行的进程运行。</li>
+<li>进程在系统资源不足（内存不足）时，要等到资源满足后才能继续运行，这个时候进程也会被挂起，并由系统调度其它进程运行</li>
+<li>当进程通过睡眠函数sleep()这样的方式将自己主动挂起时，自然也会重新调度</li>
+<li>当有优先级更高的进程运行时，为了保证高优先进程的运行，当前进程会被挂起，由高优先级进程来运行</li>
+<li>发生硬件中断时，CPU上的进程会被中断挂起，转而执行内核中的终端服务程序</li>
+</ul>
+<h4 id="线程上下文切换"><a href="#线程上下文切换" class="headerlink" title="线程上下文切换"></a>线程上下文切换</h4><p>线程与进程的最大区别在于：线程是调度的基本单位，进程是资源拥有的基本单位。所谓内核中的任务调度，实际调度的对象是线程；而进程给线程提供了虚拟内存、全局变量等资源。</p>
+<ul>
+<li>当进程只有一个线程时，可以认为进程就等于线程</li>
+<li>当进程拥有多个线程时，这些线程会共享虚拟内存和全局变量等资源，这些资源在线程上下文切换时是不需要修改的。</li>
+<li>线程也有自己的私有数据，比如栈和寄存器等，这些在线程上下文切换时也是需要保存的</li>
+</ul>
+<p>因此，线程上下文的切换也就有以下两种情况：</p>
+<ol>
+<li>同一进程内的线程上下文切换，因为虚拟内存是共享的额，在切换时不需要修改，只需要切换线程的私有数据、寄存器等不共享的数据</li>
+<li>不同进程的线程切换，这就跟进程上下文切换是一样的额</li>
+</ol>
+<h4 id="中断上下文切换"><a href="#中断上下文切换" class="headerlink" title="中断上下文切换"></a>中断上下文切换</h4><p>为了快速响应硬件的事件，中断处理会打断进程的正常调度和执行，转而调用中断处理程序，响应设备事件。而在打断其他进程时，就需要将进程当前的状态保存下来，这样在中断结束后，进程仍然可已从原来的状态恢复运行。</p>
+<p>跟进程_上下文不同，中断上下文切换并不涉及到进程的用户态。所以，即便中断过程打断了一个正处在用户态的进程，也不需要保存和恢复这个进程的虚拟内存、全局变量等用户态资源。中断上下文，其实只包括内核态中断服务程序执行所必需的状态，包括CPU寄存器、内核堆栈、硬件中断参数等。</p>
+<p>对同一个CPU来说，中断处理比进程拥有更高的优先级，所以中断上下文切换并不会与进程上下文切换同时发生。同样道理，由于中断会打断正常进程的调度和执行，所以大部分中断处理程序都短小精悍，以便尽可能快的执行结束。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/26/理解Linux软中断/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1232,7 +1430,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1254,7 +1452,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

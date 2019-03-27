@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="mac ntfs," />
+  <meta name="keywords" content="Linux 上下文," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="之前用Windows时买了个移动硬盘，换成MAC后插上硬盘发现只能读，不能写入。查了下都是说要购买软件来写入的，其实，不用花这个冤枉钱，用命令可以搞定。首先在桌面新建 文件夹 Windows1mkdir Windows 使用 diskutil list 命令查看硬盘列表，可以看到 在/dev/disk2 就是移动硬盘，而 disk2s1 就是ntfs格式的数据硬盘成员。12345678910111">
-<meta name="keywords" content="mac ntfs">
+<meta name="description" content="多个进程竞争CPU的时候并没有真正运行，为什么还会导致系统负载的升高呢？CPU上下文切换就是罪魁祸首 Linux是个多任务操作系统，多个任务并发执行并不是同时执行，而是系统将CPU轮流分配给这些任务，造成多任务同时运行的错觉。 而每个任务运行前，CPU需要知道任务从哪里加载，又从哪里开始运行，也就是说，需要系统帮他设置好CPU寄存器和程序计数器，他们都是CPU在运行任何任务之前，必须的依赖环境，因">
+<meta name="keywords" content="Linux 上下文">
 <meta property="og:type" content="article">
-<meta property="og:title" content="mac 挂在ntfs 移动硬盘">
-<meta property="og:url" content="http://yoursite.com/2018/06/09/mac-挂在ntfs-移动硬盘/index.html">
+<meta property="og:title" content="CPU上下文切换">
+<meta property="og:url" content="http://yoursite.com/2019/03/27/CPU上下文切换/index.html">
 <meta property="og:site_name" content="厦门鱼肝油厂">
-<meta property="og:description" content="之前用Windows时买了个移动硬盘，换成MAC后插上硬盘发现只能读，不能写入。查了下都是说要购买软件来写入的，其实，不用花这个冤枉钱，用命令可以搞定。首先在桌面新建 文件夹 Windows1mkdir Windows 使用 diskutil list 命令查看硬盘列表，可以看到 在/dev/disk2 就是移动硬盘，而 disk2s1 就是ntfs格式的数据硬盘成员。12345678910111">
+<meta property="og:description" content="多个进程竞争CPU的时候并没有真正运行，为什么还会导致系统负载的升高呢？CPU上下文切换就是罪魁祸首 Linux是个多任务操作系统，多个任务并发执行并不是同时执行，而是系统将CPU轮流分配给这些任务，造成多任务同时运行的错觉。 而每个任务运行前，CPU需要知道任务从哪里加载，又从哪里开始运行，也就是说，需要系统帮他设置好CPU寄存器和程序计数器，他们都是CPU在运行任何任务之前，必须的依赖环境，因">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-06-09T15:16:00.359Z">
+<meta property="og:updated_time" content="2019-03-27T06:55:20.533Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="mac 挂在ntfs 移动硬盘">
-<meta name="twitter:description" content="之前用Windows时买了个移动硬盘，换成MAC后插上硬盘发现只能读，不能写入。查了下都是说要购买软件来写入的，其实，不用花这个冤枉钱，用命令可以搞定。首先在桌面新建 文件夹 Windows1mkdir Windows 使用 diskutil list 命令查看硬盘列表，可以看到 在/dev/disk2 就是移动硬盘，而 disk2s1 就是ntfs格式的数据硬盘成员。12345678910111">
+<meta name="twitter:title" content="CPU上下文切换">
+<meta name="twitter:description" content="多个进程竞争CPU的时候并没有真正运行，为什么还会导致系统负载的升高呢？CPU上下文切换就是罪魁祸首 Linux是个多任务操作系统，多个任务并发执行并不是同时执行，而是系统将CPU轮流分配给这些任务，造成多任务同时运行的错觉。 而每个任务运行前，CPU需要知道任务从哪里加载，又从哪里开始运行，也就是说，需要系统帮他设置好CPU寄存器和程序计数器，他们都是CPU在运行任何任务之前，必须的依赖环境，因">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/06/09/mac-挂在ntfs-移动硬盘/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/03/27/CPU上下文切换/"/>
 
 
 
 
 
-  <title>mac 挂在ntfs 移动硬盘 | 厦门鱼肝油厂</title>
+  <title>CPU上下文切换 | 厦门鱼肝油厂</title>
   
 
 
@@ -263,7 +263,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/09/mac-挂在ntfs-移动硬盘/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/27/CPU上下文切换/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="BansheeLW">
@@ -280,7 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">mac 挂在ntfs 移动硬盘</h1>
+          <h1 class="post-title" itemprop="name headline">CPU上下文切换</h1>
         
 
         <div class="post-meta">
@@ -292,8 +292,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-09T17:40:18+08:00">
-                2018-06-09
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-27T14:54:05+08:00">
+                2019-03-27
               </time>
             
 
@@ -315,8 +315,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/其他/" itemprop="url" rel="index">
-                    <span itemprop="name">其他</span>
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
                   </a>
                 </span>
 
@@ -352,11 +352,63 @@
       
 
       
-        <p>之前用Windows时买了个移动硬盘，换成MAC后插上硬盘发现只能读，不能写入。查了下都是说要购买软件来写入的，其实，不用花这个冤枉钱，用命令可以搞定。<br>首先在桌面新建 文件夹 Windows<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir Windows</span><br></pre></td></tr></table></figure></p>
-<p>使用 diskutil list 命令查看硬盘列表，可以看到 在/dev/disk2 就是移动硬盘，而 disk2s1 就是ntfs格式的数据硬盘成员。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"> diskutil list</span><br><span class="line">/dev/disk0 (internal, physical):</span><br><span class="line">   #:                       TYPE NAME                    SIZE       IDENTIFIER</span><br><span class="line">   0:      GUID_partition_scheme                        *251.0 GB   disk0</span><br><span class="line">   1:                        EFI EFI                     209.7 MB   disk0s1</span><br><span class="line">   2:                 Apple_APFS Container disk1         250.8 GB   disk0s2</span><br><span class="line"></span><br><span class="line">/dev/disk1 (synthesized):</span><br><span class="line">   #:                       TYPE NAME                    SIZE       IDENTIFIER</span><br><span class="line">   0:      APFS Container Scheme -                      +250.8 GB   disk1</span><br><span class="line">                                 Physical Store disk0s2</span><br><span class="line">   1:                APFS Volume Macintosh HD            89.5 GB    disk1s1</span><br><span class="line">   2:                APFS Volume Preboot                 21.8 MB    disk1s2</span><br><span class="line">   3:                APFS Volume Recovery                509.8 MB   disk1s3</span><br><span class="line">   4:                APFS Volume VM                      2.1 GB     disk1s4</span><br><span class="line"></span><br><span class="line">/dev/disk2 (external, physical):</span><br><span class="line">   #:                       TYPE NAME                    SIZE       IDENTIFIER</span><br><span class="line">   0:      GUID_partition_scheme                        *1.0 TB     disk2</span><br><span class="line">   1:       Microsoft Basic Data Elements                1.0 TB     disk2s1</span><br></pre></td></tr></table></figure></p>
-<p>使用 sudo umount /dev/disk2s1 推出部分硬盘<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo umount /dev/disk2s1</span><br></pre></td></tr></table></figure></p>
-<p>然后再将硬盘挂载到桌面 Windows 文件夹<br>sudo mount_ntfs -o rw,nobrowse<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mount_ntfs -o rw,nobrowse /dev/disk2s1 ~/Desktop/Windows</span><br></pre></td></tr></table></figure></p>
-<p>nobrowse 表示在 Finder 中不显示这个分区，不带上这个选项是挂载不成功的。</p>
+        <p>多个进程竞争CPU的时候并没有真正运行，为什么还会导致系统负载的升高呢？CPU上下文切换就是罪魁祸首</p>
+<p>Linux是个多任务操作系统，多个任务并发执行并不是同时执行，而是系统将CPU轮流分配给这些任务，造成多任务同时运行的错觉。</p>
+<p>而每个任务运行前，CPU需要知道任务从哪里加载，又从哪里开始运行，也就是说，需要系统帮他设置好CPU寄存器和程序计数器，他们都是CPU在运行任何任务之前，必须的依赖环境，因此也被叫做CPU上下文。</p>
+<p>CPU上下文切换，就是把前一个CPU的上下文（CPU寄存器和程序计数器）保存起来，然后加载新任务的上下文到这些寄存器和程序计数器，最后再跳转到程序计数器所指向的新位置，开始运行新的任务。</p>
+<p>而这些保存起来的上下文，会存储在系统内核中，并在任务重新调度执行时再次加载进来，这样就能保证任务原来的状态不受影响，让任务看起来是连续运行的。</p>
+<blockquote>
+<p>操作系统管理的这些“任务”到底是什么？</p>
+</blockquote>
+<p>任务就只是进程或线程吗？其实不止，硬件通过触发信号，会导致中断处理程序的调用，这也是一种常见的任务。</p>
+<p>所以，根据任务的不同，CPU上下文切换可以分为几个不同的场景：</p>
+<ul>
+<li>进程上下文切换</li>
+<li>线程上下文切换</li>
+<li>中断上下文切换</li>
+</ul>
+<h4 id="进程上下文切换"><a href="#进程上下文切换" class="headerlink" title="进程上下文切换"></a>进程上下文切换</h4><p>Linux按照特权等级，把进程的运行空间分为内核空间和用户空间</p>
+<ul>
+<li>内核空间（Ring 0)具有最高权限，可以直接访问所有资源；</li>
+<li>用户空间（Ring 3) 只能访问受限资源，不能访问内存等硬件设备，必须通过系统调用陷入内核中，才能访问这些特权资源。</li>
+</ul>
+<p>系统调用过程中，发生了CPU上下文切换（CPU寄存器里原来用户态的指令，需要先保存起来。接着，为了执行内核态代码，CPU寄存器需要更新为内核态指令的新位置，最后才是跳转到内核态运行内核任务。而系统调用结束后，CPU寄存器需要回复原来保存的用户态，然后再切换到用户空间，继续运行。所以，一次系统调用发生了两次CPU上下文切换）</p>
+<blockquote>
+<p>那么，进程上下文切换与系统调用又有什么区别呢？</p>
+</blockquote>
+<p>进程是由内核来管理和调度的，进程的切换只能发生在内核态。所以，进程的上下文仅包括了虚拟内存、栈、全局变量等用户空间的资源，还包括了内核堆栈、寄存器等内核空间的状态。</p>
+<p>因此，进程的上下文切换就比系统调用多了一步：在保存当前进程的内核状态和寄存器之前，需要先把该进程的虚拟内存、栈等保存下来；而加载了下一进程的内核态后，还需要刷新进程的虚拟内存和用户态。</p>
+<p>进程上下文的频繁切换，导致CPU将大量的时间耗费在寄存器、内核栈以及虚拟内存等资源的保护和恢复上，进而大大缩短了真正运行进程的时间。</p>
+<blockquote>
+<p>什么时候才会发生进程上下文切换？</p>
+</blockquote>
+<p>进程切换时才需要切换进程上下文（即只有在进程调度时，才需要切换进程上下文）</p>
+<p>Liunx为每个CPU都维护了一个就绪队列，将活跃进程（也就是正在运行和正在等待CPU的进程）按照优先级及等待CPU的时间排序，然后选择最需要CPU的进程，也就是优先级最高和等待CPU时间最长的进程来运行。</p>
+<blockquote>
+<p>进程在什么时候才会被调度到CPU上运行？</p>
+</blockquote>
+<ul>
+<li>进程执行完终止，它占用的CPU资源会被释放，从就绪队列出拿出一个新进程过来运行</li>
+<li>为了保证所有进程都能得到公平调度，CPU时间被划分为一段段的时间片，这些时间片再被轮流分配给各个进程。这样，当某个进程的时间片耗尽，就会被系统挂起，切换到其它正在等待CPU运行的进程运行。</li>
+<li>进程在系统资源不足（内存不足）时，要等到资源满足后才能继续运行，这个时候进程也会被挂起，并由系统调度其它进程运行</li>
+<li>当进程通过睡眠函数sleep()这样的方式将自己主动挂起时，自然也会重新调度</li>
+<li>当有优先级更高的进程运行时，为了保证高优先进程的运行，当前进程会被挂起，由高优先级进程来运行</li>
+<li>发生硬件中断时，CPU上的进程会被中断挂起，转而执行内核中的终端服务程序</li>
+</ul>
+<h4 id="线程上下文切换"><a href="#线程上下文切换" class="headerlink" title="线程上下文切换"></a>线程上下文切换</h4><p>线程与进程的最大区别在于：线程是调度的基本单位，进程是资源拥有的基本单位。所谓内核中的任务调度，实际调度的对象是线程；而进程给线程提供了虚拟内存、全局变量等资源。</p>
+<ul>
+<li>当进程只有一个线程时，可以认为进程就等于线程</li>
+<li>当进程拥有多个线程时，这些线程会共享虚拟内存和全局变量等资源，这些资源在线程上下文切换时是不需要修改的。</li>
+<li>线程也有自己的私有数据，比如栈和寄存器等，这些在线程上下文切换时也是需要保存的</li>
+</ul>
+<p>因此，线程上下文的切换也就有以下两种情况：</p>
+<ol>
+<li>同一进程内的线程上下文切换，因为虚拟内存是共享的额，在切换时不需要修改，只需要切换线程的私有数据、寄存器等不共享的数据</li>
+<li>不同进程的线程切换，这就跟进程上下文切换是一样的额</li>
+</ol>
+<h4 id="中断上下文切换"><a href="#中断上下文切换" class="headerlink" title="中断上下文切换"></a>中断上下文切换</h4><p>为了快速响应硬件的事件，中断处理会打断进程的正常调度和执行，转而调用中断处理程序，响应设备事件。而在打断其他进程时，就需要将进程当前的状态保存下来，这样在中断结束后，进程仍然可已从原来的状态恢复运行。</p>
+<p>跟进程_上下文不同，中断上下文切换并不涉及到进程的用户态。所以，即便中断过程打断了一个正处在用户态的进程，也不需要保存和恢复这个进程的虚拟内存、全局变量等用户态资源。中断上下文，其实只包括内核态中断服务程序执行所必需的状态，包括CPU寄存器、内核堆栈、硬件中断参数等。</p>
+<p>对同一个CPU来说，中断处理比进程拥有更高的优先级，所以中断上下文切换并不会与进程上下文切换同时发生。同样道理，由于中断会打断正常进程的调度和执行，所以大部分中断处理程序都短小精悍，以便尽可能快的执行结束。</p>
 
       
     </div>
@@ -374,7 +426,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/mac-ntfs/" rel="tag"># mac ntfs</a>
+            <a href="/tags/Linux-上下文/" rel="tag"># Linux 上下文</a>
           
         </div>
       
@@ -387,15 +439,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2019/03/26/理解Linux软中断/" rel="next" title="理解Linux软中断">
+                <i class="fa fa-chevron-left"></i> 理解Linux软中断
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/06/12/高性能Mysql之数据类型优化/" rel="prev" title="高性能Mysql之数据类型优化">
-                高性能Mysql之数据类型优化 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -447,8 +499,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -512,6 +573,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#进程上下文切换"><span class="nav-number">1.</span> <span class="nav-text">进程上下文切换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程上下文切换"><span class="nav-number">2.</span> <span class="nav-text">线程上下文切换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#中断上下文切换"><span class="nav-number">3.</span> <span class="nav-text">中断上下文切换</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
