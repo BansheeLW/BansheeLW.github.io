@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Linux 文件系统 磁盘," />
+  <meta name="keywords" content="hash," />
 
 
 
@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
-<meta name="keywords" content="Linux 文件系统 磁盘">
+<meta name="description" content="常识点：英文“hash”,中文有翻译为哈希的，也有翻译成散列的。 哈希算法：将任意长度的二进制值串映射为固定长度二进制值串，这个映射规则就是哈希算法，而通过原始数据映射之后得到的二进制值串就是哈希值。 优秀的哈希算法应该满足的几点： 从哈希值不能反向推导出原始数据（所以哈希算法也叫单向哈希算法 对输入数据非常敏感，哪怕原始数据只修改了一个Bit,最终得到的哈希值也大不相同 散列冲突的概率要很小，对">
+<meta name="keywords" content="hash">
 <meta property="og:type" content="article">
-<meta property="og:title" content="文件系统与磁盘的区别">
-<meta property="og:url" content="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/index.html">
+<meta property="og:title" content="哈希算法">
+<meta property="og:url" content="http://yoursite.com/2019/03/29/哈希算法/index.html">
 <meta property="og:site_name" content="厦门鱼肝油厂">
-<meta property="og:description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
+<meta property="og:description" content="常识点：英文“hash”,中文有翻译为哈希的，也有翻译成散列的。 哈希算法：将任意长度的二进制值串映射为固定长度二进制值串，这个映射规则就是哈希算法，而通过原始数据映射之后得到的二进制值串就是哈希值。 优秀的哈希算法应该满足的几点： 从哈希值不能反向推导出原始数据（所以哈希算法也叫单向哈希算法 对输入数据非常敏感，哪怕原始数据只修改了一个Bit,最终得到的哈希值也大不相同 散列冲突的概率要很小，对">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-26T04:03:44.185Z">
+<meta property="og:updated_time" content="2019-03-29T08:29:26.151Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="文件系统与磁盘的区别">
-<meta name="twitter:description" content="磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。 磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。 Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,cl">
+<meta name="twitter:title" content="哈希算法">
+<meta name="twitter:description" content="常识点：英文“hash”,中文有翻译为哈希的，也有翻译成散列的。 哈希算法：将任意长度的二进制值串映射为固定长度二进制值串，这个映射规则就是哈希算法，而通过原始数据映射之后得到的二进制值串就是哈希值。 优秀的哈希算法应该满足的几点： 从哈希值不能反向推导出原始数据（所以哈希算法也叫单向哈希算法 对输入数据非常敏感，哪怕原始数据只修改了一个Bit,最终得到的哈希值也大不相同 散列冲突的概率要很小，对">
 
 
 
@@ -120,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/03/29/哈希算法/"/>
 
 
 
 
 
-  <title>文件系统与磁盘的区别 | 厦门鱼肝油厂</title>
+  <title>哈希算法 | 厦门鱼肝油厂</title>
   
 
 
@@ -263,7 +263,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/29/哈希算法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="BansheeLW">
@@ -280,7 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">文件系统与磁盘的区别</h1>
+          <h1 class="post-title" itemprop="name headline">哈希算法</h1>
         
 
         <div class="post-meta">
@@ -292,8 +292,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-26T12:01:34+08:00">
-                2019-03-26
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-29T16:25:53+08:00">
+                2019-03-29
               </time>
             
 
@@ -315,8 +315,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Linux/" itemprop="url" rel="index">
-                    <span itemprop="name">Linux</span>
+                  <a href="/categories/算法/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
                   </a>
                 </span>
 
@@ -352,20 +352,43 @@
       
 
       
-        <p>磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。</p>
-<p>磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。</p>
-<p>Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,close等）</p>
-<ul>
-<li>我们常说的“文件”，其实指的是普通文件</li>
-<li>而磁盘或者分区，则是指块设备文件</li>
+        <p>常识点：英文“hash”,中文有翻译为哈希的，也有翻译成散列的。</p>
+<p>哈希算法：将任意长度的二进制值串映射为固定长度二进制值串，这个映射规则就是哈希算法，而通过原始数据映射之后得到的二进制值串就是哈希值。</p>
+<h5 id="优秀的哈希算法应该满足的几点："><a href="#优秀的哈希算法应该满足的几点：" class="headerlink" title="优秀的哈希算法应该满足的几点："></a>优秀的哈希算法应该满足的几点：</h5><ul>
+<li>从哈希值不能反向推导出原始数据（所以哈希算法也叫单向哈希算法</li>
+<li>对输入数据非常敏感，哪怕原始数据只修改了一个Bit,最终得到的哈希值也大不相同</li>
+<li>散列冲突的概率要很小，对于不同的原始数据，哈希值相同的概率要很小。</li>
+<li>哈希算法的执行效率要尽量高效，针对较长的文本，也能快速地计算出哈希值</li>
 </ul>
-<p>在读写普通文件时，I/O请求会首先通过文件系统，然后有文件系统负责与磁盘进行交互。而在读写块设备时，会跳过文件系统，直接与磁盘交互，即所谓的“裸I/O”。</p>
-<p>这两种读写方式使用的缓存自然不同。文件系统管理的缓存，其实就是Cache的一部分。而裸磁盘的缓存，用的是Buffer.</p>
-<p>用ls -l命令查看 /dev 目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//块设备文件</span><br><span class="line">-Port</span><br><span class="line">brw-r-----  1 root     operator         1,   0  2 13 10:13 disk0</span><br><span class="line"></span><br><span class="line">//字符设备文件</span><br><span class="line">crw-------  1 root     wheel           18,   1  3 25 10:28 afsc_type5</span><br></pre></td></tr></table></figure></p>
+<h3 id="哈希算法的应用"><a href="#哈希算法的应用" class="headerlink" title="哈希算法的应用"></a>哈希算法的应用</h3><h4 id="应用一：安全加密"><a href="#应用一：安全加密" class="headerlink" title="应用一：安全加密"></a>应用一：安全加密</h4><p>我们常见的用于加密的哈希算法有</p>
 <ul>
-<li>b（block） 表示块设备文件，一般置于/dev目录下，一次传输数据为一整块的设备，如硬盘、光盘。最小数据传输单位为一个数据块（通常一个数据块的大小为 512 字节）</li>
-<li>c (character)字符设备文件，一般置于/dev目录下，一次传输一个字节的设备，如字符终端，键盘等，传输数据的最小单位为一个字节。</li>
+<li>MD5（Message-Digest Algorithm 消息摘要算法）</li>
+<li>SHA（Secure Hash Algorithm 安全散列算法）</li>
+<li>DES (Data Encryption Standard 数据加密标准)</li>
+<li>AES (Advanced Encryption Standard 高级加密标准)</li>
 </ul>
+<p>对于加密算法，以上四点有两点格外重要</p>
+<ol>
+<li>很难根据哈希值反向推导出原始数据（加密的目的就是要放置原始数据泄漏</li>
+<li>哈希冲突的概率要很小(理论上冲突不可能避免，只能减小碰撞冲突的概率)</li>
+</ol>
+<p>知识扩展：鸽巢原理</p>
+<h5 id="为什么哈希算法无法做到零冲突？"><a href="#为什么哈希算法无法做到零冲突？" class="headerlink" title="为什么哈希算法无法做到零冲突？"></a>为什么哈希算法无法做到零冲突？</h5><p>哈希算法产生的哈希值是有固定长度的，如之前的MD5哈希值，是固定的128位二进制串，能表示的数据是有限的，最多能表示 2^128个数据。而如果我们要对2^128+1个数据求哈希值，则必然存在哈希相同的情况。一般情况下，哈希值越长的哈希算法，哈希冲突的概率也就越低。</p>
+<p>越复杂，越难破解的哈希算法，需要的计算时间也越长。</p>
+<h4 id="应用二：唯一标识"><a href="#应用二：唯一标识" class="headerlink" title="应用二：唯一标识"></a>应用二：唯一标识</h4><p>例子：海量图库搜寻一张图是否存在。<br>将图片的二进制码选取头尾字节，MD5得到哈希值，作为图片的唯一标识。放入散列表(键是哈希值，值是图片的路径)，这样搜索的时间复杂度是O(1),找到图片后再对比二进制信息是否一致。</p>
+<h4 id="应用三：数据校验"><a href="#应用三：数据校验" class="headerlink" title="应用三：数据校验"></a>应用三：数据校验</h4><p>下载文件，如何知道文件是否被篡改过？种子文件里有文件的哈希值，下载完成后将文件用相同的哈希函数生成哈希值，如果与种子文件里的哈希值一致就说明未被篡改。</p>
+<h4 id="应用四：散列函数"><a href="#应用四：散列函数" class="headerlink" title="应用四：散列函数"></a>应用四：散列函数</h4><p>散列函数是设计散列表的一个关键，它直接决定了散列冲突的概率和散列表的性能。不过，相对于哈希函数的其他应用，散列函数对散列算法冲突的要求低很多。即便出现个别散列冲突，也可以通过开放寻址法或开链法解决。</p>
+<p>不仅如此，散列函数对于散列计算得到的散列值，能够被反向解密也不关系。这里更加关注散列得到的值能否均匀分布，除此之外，散列算法的计算快慢，也影响散列表的性能。所以，散列函数用的散列算法一遍都比较简单，比较追求效率。</p>
+<h4 id="应用五：负载均衡"><a href="#应用五：负载均衡" class="headerlink" title="应用五：负载均衡"></a>应用五：负载均衡</h4><p>负载均衡的算法：加权、随机、加权轮询等。如果要实现一个会话粘滞的负载均衡算法，那么最简单的方案就是维护一个映射表（客户端id或会话id与服务器编号的映射关系），但这种方案有些弊端：</p>
+<ul>
+<li>如果客户端很多，那么映射表会很大，比较浪费内存空间</li>
+<li>客户端上线、下线、服务器扩容、缩容都会导致映射失效，这样维护这个映射表的成本就非常大</li>
+</ul>
+<p>借助哈希算法，对客户端IP或会话ID进行哈希计算，将取得的哈希值与服务器列表大小进行取模运算，最终得到的值就是应该被路由到的服务器编号。这种方式来保证同一个IP过来的请求都路由到同一台服务器。</p>
+<p>这种哈希取模算法，也存在因扩容、缩容导致路由不一致的问题。那么应该也需要记住一致性哈希算法的原理去处理。</p>
+<p>个人觉得，处理这种session会话使用分布式缓存方案会比较好，服务器保持无状态。</p>
+<h4 id="应用六：数据分片"><a href="#应用六：数据分片" class="headerlink" title="应用六：数据分片"></a>应用六：数据分片</h4><p>通过哈希算法对处理的海量数据进行分片，多机分布式处理，可以突破单机资源的限制。</p>
+<h4 id="应用七：分布式存储"><a href="#应用七：分布式存储" class="headerlink" title="应用七：分布式存储"></a>应用七：分布式存储</h4><p>使用一致性哈希算法原理，解决分布式缓存系统扩容、缩容导致数据迁移的问题。（分布式缓存中，节点挂掉后，可以直接让这部分缓存失效即可，不必做数据迁移）</p>
 
       
     </div>
@@ -383,7 +406,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Linux-文件系统-磁盘/" rel="tag"># Linux 文件系统 磁盘</a>
+            <a href="/tags/hash/" rel="tag"># hash</a>
           
         </div>
       
@@ -396,8 +419,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/08/22/MySQL数据类型补充/" rel="next" title="MySQL数据类型补充">
-                <i class="fa fa-chevron-left"></i> MySQL数据类型补充
+              <a href="/2019/03/27/leetcode-98之验证二叉搜索树/" rel="next" title="leetcode-98之验证二叉搜索树">
+                <i class="fa fa-chevron-left"></i> leetcode-98之验证二叉搜索树
               </a>
             
           </div>
@@ -405,10 +428,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/03/26/理解Linux软中断/" rel="prev" title="理解Linux软中断">
-                理解Linux软中断 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -460,8 +479,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -525,6 +553,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#优秀的哈希算法应该满足的几点："><span class="nav-number">1.</span> <span class="nav-text">优秀的哈希算法应该满足的几点：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哈希算法的应用"><span class="nav-number"></span> <span class="nav-text">哈希算法的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#应用一：安全加密"><span class="nav-number"></span> <span class="nav-text">应用一：安全加密</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#为什么哈希算法无法做到零冲突？"><span class="nav-number">1.</span> <span class="nav-text">为什么哈希算法无法做到零冲突？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用二：唯一标识"><span class="nav-number"></span> <span class="nav-text">应用二：唯一标识</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用三：数据校验"><span class="nav-number"></span> <span class="nav-text">应用三：数据校验</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用四：散列函数"><span class="nav-number"></span> <span class="nav-text">应用四：散列函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用五：负载均衡"><span class="nav-number"></span> <span class="nav-text">应用五：负载均衡</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用六：数据分片"><span class="nav-number"></span> <span class="nav-text">应用六：数据分片</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#应用七：分布式存储"><span class="nav-number"></span> <span class="nav-text">应用七：分布式存储</span></a></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
