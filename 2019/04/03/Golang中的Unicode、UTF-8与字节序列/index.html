@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Golang Unicode UTF-8," />
 
 
 
@@ -79,16 +79,18 @@
 
 
 
-<meta name="description" content="太阳落山了，我是你的渔船，你的锚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="厦门鱼肝油厂">
-<meta property="og:url" content="http://yoursite.com/archives/index.html">
+<meta name="description" content="在对Go语言的字符串进行操作时，都会遇到 unicode、UTF-8和字节序列这几个词，一直对这几个名称之间的关系一知半解。今次，我们就来理清这里的关系。 Unicode定义了一个字符与一个编码的映射，但是，对应的存储却没有制定。就拿一个大写字符A来说，对应编码是0x0041，但因此存储规则没有制定，那么，如果我们用4个字节来存储，就是0x00000041。这种规定了用几个字节来存储的方式，就可以">
+<meta name="keywords" content="Golang Unicode UTF-8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang中的Unicode、UTF-8与字节序列">
+<meta property="og:url" content="http://yoursite.com/2019/04/03/Golang中的Unicode、UTF-8与字节序列/index.html">
 <meta property="og:site_name" content="厦门鱼肝油厂">
-<meta property="og:description" content="太阳落山了，我是你的渔船，你的锚">
+<meta property="og:description" content="在对Go语言的字符串进行操作时，都会遇到 unicode、UTF-8和字节序列这几个词，一直对这几个名称之间的关系一知半解。今次，我们就来理清这里的关系。 Unicode定义了一个字符与一个编码的映射，但是，对应的存储却没有制定。就拿一个大写字符A来说，对应编码是0x0041，但因此存储规则没有制定，那么，如果我们用4个字节来存储，就是0x00000041。这种规定了用几个字节来存储的方式，就可以">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-04-03T09:31:54.049Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="厦门鱼肝油厂">
-<meta name="twitter:description" content="太阳落山了，我是你的渔船，你的锚">
+<meta name="twitter:title" content="Golang中的Unicode、UTF-8与字节序列">
+<meta name="twitter:description" content="在对Go语言的字符串进行操作时，都会遇到 unicode、UTF-8和字节序列这几个词，一直对这几个名称之间的关系一知半解。今次，我们就来理清这里的关系。 Unicode定义了一个字符与一个编码的映射，但是，对应的存储却没有制定。就拿一个大写字符A来说，对应编码是0x0041，但因此存储规则没有制定，那么，如果我们用4个字节来存储，就是0x00000041。这种规定了用几个字节来存储的方式，就可以">
 
 
 
@@ -118,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/archives/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/04/03/Golang中的Unicode、UTF-8与字节序列/"/>
 
 
 
 
 
-  <title>归档 | 厦门鱼肝油厂</title>
+  <title>Golang中的Unicode、UTF-8与字节序列 | 厦门鱼肝油厂</title>
   
 
 
@@ -143,7 +145,7 @@
     
   
 
-  <div class="container sidebar-position-right page-archive">
+  <div class="container sidebar-position-right page-post-detail">
     <div class="headband"></div>
           <a href="https://github.com/BansheeLW"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_green_007200.png" alt="Fork me on GitHub"></a>
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -247,416 +249,174 @@
           <div id="content" class="content">
             
 
+  <div id="posts" class="posts-expand">
+    
+
+  
+
   
   
   
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
 
-      <span class="archive-page-counter">
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/03/Golang中的Unicode、UTF-8与字节序列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
         
         
+          <h1 class="post-title" itemprop="name headline">Golang中的Unicode、UTF-8与字节序列</h1>
         
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-03T17:27:49+08:00">
+                2019-04-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
           
-        
-        嗯..! 目前共计 11 篇日志。 继续努力。
-      </span>
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
 
-      
-
-        
-        
-        
-
-        
+                
+                
+              
+            </span>
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2019">2019</h1>
-          </div>
-        
-        
 
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/04/03/Golang中的Unicode、UTF-8与字节序列/" itemprop="url">
-              
-                <span itemprop="name">Golang中的Unicode、UTF-8与字节序列</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-04-03T17:27:49+08:00"
-              content="2019-04-03" >
-          04-03
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/03/29/leetcode-20之有效括号/" itemprop="url">
-              
-                <span itemprop="name">leetcode-20之有效括号</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-03-29T17:22:42+08:00"
-              content="2019-03-29" >
-          03-29
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/03/29/哈希算法/" itemprop="url">
-              
-                <span itemprop="name">哈希算法</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-03-29T16:25:53+08:00"
-              content="2019-03-29" >
-          03-29
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/03/27/leetcode-98之验证二叉搜索树/" itemprop="url">
-              
-                <span itemprop="name">leetcode-98之验证二叉搜索树</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-03-27T19:01:58+08:00"
-              content="2019-03-27" >
-          03-27
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/03/27/CPU上下文切换/" itemprop="url">
-              
-                <span itemprop="name">CPU上下文切换</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-03-27T14:54:05+08:00"
-              content="2019-03-27" >
-          03-27
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/03/26/理解Linux软中断/" itemprop="url">
-              
-                <span itemprop="name">理解Linux软中断</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-03-26T14:51:07+08:00"
-              content="2019-03-26" >
-          03-26
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/03/26/文件系统与磁盘的区别/" itemprop="url">
-              
-                <span itemprop="name">文件系统与磁盘的区别</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2019-03-26T12:01:34+08:00"
-              content="2019-03-26" >
-          03-26
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2018">2018</h1>
-          </div>
-        
-        
+            
+          
 
-        
+          
+          
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+          
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/08/22/MySQL数据类型补充/" itemprop="url">
-              
-                <span itemprop="name">MySQL数据类型补充</span>
-              
-            </a>
-        
-      </h2>
+          
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-08-22T23:03:00+08:00"
-              content="2018-08-22" >
-          08-22
-        </time>
-      </div>
+          
 
-    </header>
-  </article>
+        </div>
+      </header>
+    
 
-
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/07/16/ssh-登陆遇到-Host-key-verification-failed/" itemprop="url">
-              
-                <span itemprop="name">ssh 登陆遇到 Host key verification failed</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-07-16T20:42:27+08:00"
-              content="2018-07-16" >
-          07-16
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/06/12/高性能Mysql之数据类型优化/" itemprop="url">
-              
-                <span itemprop="name">高性能Mysql之数据类型优化</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-06-12T22:46:20+08:00"
-              content="2018-06-12" >
-          06-12
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+      
+        <p>在对Go语言的字符串进行操作时，都会遇到 unicode、UTF-8和字节序列这几个词，一直对这几个名称之间的关系一知半解。今次，我们就来理清这里的关系。</p>
+<p>Unicode定义了一个字符与一个编码的映射，但是，对应的存储却没有制定。就拿一个大写字符A来说，对应编码是0x0041，但因此存储规则没有制定，那么，如果我们用4个字节来存储，就是0x00000041。这种规定了用几个字节来存储的方式，就可以说是Unicode编码规范的具体实现。比如，UTF-8（最少用一个字节就能表示一个字符的编码实现，最多使用四个字节）和UTF-16(最少用两个字节能表示一个字符的编码实现)。</p>
+<p>Go语言中的string类型值由若干个Unicode字符（也叫Unicode码点）组成，每个Unicode字符都可以由一个rune类型的值来承载。这些字符在底层都会转换为UTF-8编码值，而UTF-8编码值又会以字节序列的形式来表达和存储，因此，一个string类型的值在底层就是一个能够表达若干个UTF-8编码值的字节序列。</p>
+<p>我们常使用for …range 语句对string进行遍历，例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	str := &quot;UTF 码点 &quot;</span><br><span class="line">	for i, c := range str &#123;</span><br><span class="line">		fmt.Printf(&quot;%d: %q [% x]\n&quot;, i, c, []byte(string(c)))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/*</span><br><span class="line">索引 Unicode码点 字节序列（字符存储使用的是UTF-8编码，至少使用一个字节，最多四个字节，英文一个字节，中文三个字节）</span><br><span class="line">0: &apos;U&apos; [55]</span><br><span class="line">1: &apos;T&apos; [54]</span><br><span class="line">2: &apos;F&apos; [46]</span><br><span class="line">3: &apos; &apos; [20]</span><br><span class="line">4: &apos;码&apos; [e7 a0 81]</span><br><span class="line">7: &apos;点&apos; [e7 82 b9]</span><br><span class="line">10: &apos; &apos; [20]</span><br><span class="line">*/</span><br></pre></td></tr></table></figure></p>
+<p>这段代码，可以看出，for语句逐一迭代的是字符串里的每个Unicode字符，字符串的底层实现是字节序列，使用UTF-8编码，根据Unicode字符的不同而选择不同的字节长度来存储这个字符。所以说，迭代的时候，就是在字节序列里，去迭代每一个UTF-8编码值，也就是每一个Unicode字符。</p>
+<p>总结：字符串string就是一个个Unicode字符组成的，底层使用UTF-8编码格式来存储Unicode字符（UTF-8编码方案是Unicode编码规范的一种具体实现，使用至少一个字节来存储Unicode字符，最多四个字节）。</p>
 
       
-
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang-Unicode-UTF-8/" rel="tag"># Golang Unicode UTF-8</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/29/leetcode-20之有效括号/" rel="next" title="leetcode-20之有效括号">
+                <i class="fa fa-chevron-left"></i> leetcode-20之有效括号
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
+  </article>
 
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -664,6 +424,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -889,6 +653,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 

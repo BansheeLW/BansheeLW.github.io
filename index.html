@@ -262,6 +262,153 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/03/Golang中的Unicode、UTF-8与字节序列/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/03/Golang中的Unicode、UTF-8与字节序列/" itemprop="url">Golang中的Unicode、UTF-8与字节序列</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-03T17:27:49+08:00">
+                2019-04-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在对Go语言的字符串进行操作时，都会遇到 unicode、UTF-8和字节序列这几个词，一直对这几个名称之间的关系一知半解。今次，我们就来理清这里的关系。</p>
+<p>Unicode定义了一个字符与一个编码的映射，但是，对应的存储却没有制定。就拿一个大写字符A来说，对应编码是0x0041，但因此存储规则没有制定，那么，如果我们用4个字节来存储，就是0x00000041。这种规定了用几个字节来存储的方式，就可以说是Unicode编码规范的具体实现。比如，UTF-8（最少用一个字节就能表示一个字符的编码实现，最多使用四个字节）和UTF-16(最少用两个字节能表示一个字符的编码实现)。</p>
+<p>Go语言中的string类型值由若干个Unicode字符（也叫Unicode码点）组成，每个Unicode字符都可以由一个rune类型的值来承载。这些字符在底层都会转换为UTF-8编码值，而UTF-8编码值又会以字节序列的形式来表达和存储，因此，一个string类型的值在底层就是一个能够表达若干个UTF-8编码值的字节序列。</p>
+<p>我们常使用for …range 语句对string进行遍历，例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line">import &quot;fmt&quot;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	str := &quot;UTF 码点 &quot;</span><br><span class="line">	for i, c := range str &#123;</span><br><span class="line">		fmt.Printf(&quot;%d: %q [% x]\n&quot;, i, c, []byte(string(c)))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/*</span><br><span class="line">索引 Unicode码点 字节序列（字符存储使用的是UTF-8编码，至少使用一个字节，最多四个字节，英文一个字节，中文三个字节）</span><br><span class="line">0: &apos;U&apos; [55]</span><br><span class="line">1: &apos;T&apos; [54]</span><br><span class="line">2: &apos;F&apos; [46]</span><br><span class="line">3: &apos; &apos; [20]</span><br><span class="line">4: &apos;码&apos; [e7 a0 81]</span><br><span class="line">7: &apos;点&apos; [e7 82 b9]</span><br><span class="line">10: &apos; &apos; [20]</span><br><span class="line">*/</span><br></pre></td></tr></table></figure></p>
+<p>这段代码，可以看出，for语句逐一迭代的是字符串里的每个Unicode字符，字符串的底层实现是字节序列，使用UTF-8编码，根据Unicode字符的不同而选择不同的字节长度来存储这个字符。所以说，迭代的时候，就是在字节序列里，去迭代每一个UTF-8编码值，也就是每一个Unicode字符。</p>
+<p>总结：字符串string就是一个个Unicode字符组成的，底层使用UTF-8编码格式来存储Unicode字符（UTF-8编码方案是Unicode编码规范的一种具体实现，使用至少一个字节来存储Unicode字符，最多四个字节）。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/29/leetcode-20之有效括号/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1720,155 +1867,13 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/09/mac-挂在ntfs-移动硬盘/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="BansheeLW">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="厦门鱼肝油厂">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/09/mac-挂在ntfs-移动硬盘/" itemprop="url">mac 挂在ntfs 移动硬盘</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-09T17:40:18+08:00">
-                2018-06-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/其他/" itemprop="url" rel="index">
-                    <span itemprop="name">其他</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前用Windows时买了个移动硬盘，换成MAC后插上硬盘发现只能读，不能写入。查了下都是说要购买软件来写入的，其实，不用花这个冤枉钱，用命令可以搞定。<br>首先在桌面新建 文件夹 Windows<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir Windows</span><br></pre></td></tr></table></figure></p>
-<p>使用 diskutil list 命令查看硬盘列表，可以看到 在/dev/disk2 就是移动硬盘，而 disk2s1 就是ntfs格式的数据硬盘成员。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"> diskutil list</span><br><span class="line">/dev/disk0 (internal, physical):</span><br><span class="line">   #:                       TYPE NAME                    SIZE       IDENTIFIER</span><br><span class="line">   0:      GUID_partition_scheme                        *251.0 GB   disk0</span><br><span class="line">   1:                        EFI EFI                     209.7 MB   disk0s1</span><br><span class="line">   2:                 Apple_APFS Container disk1         250.8 GB   disk0s2</span><br><span class="line"></span><br><span class="line">/dev/disk1 (synthesized):</span><br><span class="line">   #:                       TYPE NAME                    SIZE       IDENTIFIER</span><br><span class="line">   0:      APFS Container Scheme -                      +250.8 GB   disk1</span><br><span class="line">                                 Physical Store disk0s2</span><br><span class="line">   1:                APFS Volume Macintosh HD            89.5 GB    disk1s1</span><br><span class="line">   2:                APFS Volume Preboot                 21.8 MB    disk1s2</span><br><span class="line">   3:                APFS Volume Recovery                509.8 MB   disk1s3</span><br><span class="line">   4:                APFS Volume VM                      2.1 GB     disk1s4</span><br><span class="line"></span><br><span class="line">/dev/disk2 (external, physical):</span><br><span class="line">   #:                       TYPE NAME                    SIZE       IDENTIFIER</span><br><span class="line">   0:      GUID_partition_scheme                        *1.0 TB     disk2</span><br><span class="line">   1:       Microsoft Basic Data Elements                1.0 TB     disk2s1</span><br></pre></td></tr></table></figure></p>
-<p>使用 sudo umount /dev/disk2s1 推出部分硬盘<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo umount /dev/disk2s1</span><br></pre></td></tr></table></figure></p>
-<p>然后再将硬盘挂载到桌面 Windows 文件夹<br>sudo mount_ntfs -o rw,nobrowse<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mount_ntfs -o rw,nobrowse /dev/disk2s1 ~/Desktop/Windows</span><br></pre></td></tr></table></figure></p>
-<p>nobrowse 表示在 Finder 中不显示这个分区，不带上这个选项是挂载不成功的。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -1916,7 +1921,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1927,7 +1932,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -1938,7 +1943,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
