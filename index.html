@@ -359,14 +359,16 @@
 <p>在 macOS 上编译 Linux 可执行文件时，遇到了一些坑，这里做下记录。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./httpServer ./</span><br></pre></td></tr></table></figure>
 <p>编译没有任何问题，可真正到工控机上运行的时候，报了 go-sqlite3 包未 import 的问题。</p>
-<p>==models setup fail err:sql: unknown driver “sqlite3” (forgotten import?)==</p>
-<p>查了一下，<br>==go-sqlite3 is cgo module. so you need to install cross C compiler.==<br>大意是go-sqlite包使用了CGO module，所以编译时要开启CGO_ENABLED，即<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CGO_ENABLED=1</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>models setup fail err:sql: unknown driver “sqlite3” (forgotten import?)</p>
+</blockquote>
+<p>查了一下，<br>go-sqlite3 is cgo module. so you need to install cross C compiler.<br>大意是go-sqlite包使用了CGO module，所以编译时要开启CGO_ENABLED，即<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CGO_ENABLED=1</span><br></pre></td></tr></table></figure></p>
 <p>还需要安装C交叉编译器<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ brew install FiloSottile/musl-cross/musl-cross</span><br></pre></td></tr></table></figure></p>
 <p>这个安装耗时比较久，大概要40分钟（我的本子风扇会呼啦啦转，发热严重），但请耐心等待安装完成。</p>
 <p>然后使用下面的命令就可以编译成功了！！！<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CC=x86_64-linux-musl-gcc CXX=x86_64-linux-musl-g++ GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -ldflags &quot;-linkmode external -extldflags -static&quot; -o ./httpServer./</span><br></pre></td></tr></table></figure></p>
 <p>参考:</p>
 <ol>
-<li><a href="https://github.com/mattn/go-sqlite3/issues/384" target="_blank" rel="noopener">Github的go-sqlite3相关issue</a></li>
+<li><a href="https://github.com/mattn/go-sqlite3/issues/384" target="_blank" rel="noopener">Github上go-sqlite3相关issue</a></li>
 </ol>
 
           
