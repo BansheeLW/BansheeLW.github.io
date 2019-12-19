@@ -281,7 +281,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/12/19/Linux下开机自启动顺序之坑小记/" itemprop="url">未命名</a></h1>
+                <a class="post-title-link" href="/2019/12/19/Linux下开机自启动顺序之坑小记/" itemprop="url">Linux下开机自启动顺序之坑小记</a></h1>
         
 
         <div class="post-meta">
@@ -303,6 +303,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -333,7 +355,10 @@
       
         
           
-            
+            <p>背景介绍：工控机上有个使用 superviosr 守护的程序（下称之为ck），ck 的启动依赖于 MySQL。superviosr 与 MySQL 都加入了开机自启动豪华套餐。</p>
+<p>问题描述：一线实施人员发现某个试点项目案场的 ck 程序未能正常运行，研发排查发现是因为案场曾停过电，工控机重新启动时，ck 程序先于 MySQL 启动了。而 ck   程序的自动重启次数设置的太低（重启次数用完了 MySQL 仍未完全启动完成），导致未能正常运行。</p>
+<p>解决方案：在 supervisor 的自启动设置上，加上后于 MySQL 启动的规则<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ cd /lib/systemd/system</span><br><span class="line">$ sudo vim sudo vim supervisor.service</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 在After 附加上 mysql.service,以空格分隔</span><br><span class="line">[Uint]</span><br><span class="line">After=network.target mysql.service</span><br></pre></td></tr></table></figure>
           
         
       
@@ -1911,7 +1936,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">12</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
