@@ -262,6 +262,167 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/25/HTTP Hijack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/04/25/HTTP Hijack/" itemprop="url">HTTP hijack</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-25T11:14:44+08:00">
+                2020-04-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>今天在学习标准库net/rpc时，看rpc基于HTTP的那段内容，发现了一个有趣的地方。</p>
+<p>RPC OVER HTTP，只是使用HTTP协议来建立连接，连接建立后，就没HTTP啥事了。这里有个术语叫hijack(劫持)。</p>
+<p>RPC OVER HTTP<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">func main() &#123;</span><br><span class="line">    </span><br><span class="line">    // new 一个 Arith 对象</span><br><span class="line">    arith := new(Arith)</span><br><span class="line">    // 将 arith 对象注册进rpc default 服务</span><br><span class="line">    rpc.Register(arith)</span><br><span class="line">    // 将rpc服务注册到HTTP协议上</span><br><span class="line">    rpc.HandleHTTP()</span><br><span class="line"></span><br><span class="line">    // http 负责监听端口</span><br><span class="line">    err := http.ListenAndServe(&quot;:1234&quot;, nil)</span><br><span class="line">    if err != nil &#123;</span><br><span class="line">        fmt.Println(err.Error())</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rpc.HandleHTTP()</span><br><span class="line"></span><br><span class="line">---&gt;</span><br><span class="line">里面其实也是将rpc server 作为实现了 http.Handler 接口的 handler（负责处理请求），传递给http包下的缺省 servermux 路由管理器</span><br></pre></td></tr></table></figure>
+<p>RPC server 实现了 http.Handler 接口，也就是有ServerHTTP方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">    // ServeHTTP implements an http.Handler that answers RPC requests.</span><br><span class="line">func (server *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) &#123;</span><br><span class="line">	if req.Method != &quot;CONNECT&quot; &#123;</span><br><span class="line">		w.Header().Set(&quot;Content-Type&quot;, &quot;text/plain; charset=utf-8&quot;)</span><br><span class="line">		w.WriteHeader(http.StatusMethodNotAllowed)</span><br><span class="line">		io.WriteString(w, &quot;405 must CONNECT\n&quot;)</span><br><span class="line">		return</span><br><span class="line">	&#125;</span><br><span class="line">	conn, _, err := w.(http.Hijacker).Hijack()</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		log.Print(&quot;rpc hijacking &quot;, req.RemoteAddr, &quot;: &quot;, err.Error())</span><br><span class="line">		return</span><br><span class="line">	&#125;</span><br><span class="line">	io.WriteString(conn, &quot;HTTP/1.0 &quot;+connected+&quot;\n\n&quot;)</span><br><span class="line">	server.ServeConn(conn)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>ServerHTTP 处理了HTTP请求的业务逻辑，它首先处理HTTP的CONNECT请求，接收后就Hijack这个请求，然后将请求conn 扔给 ServerConn去处理。可以看出，net/rpc 只是利用 HTTP CONNECT 建立连接，这与普通的RESTful api 还是不一样的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">type Hijacker interface &#123;</span><br><span class="line">	// Hijack lets the caller take over the connection.</span><br><span class="line">	// After a call to Hijack the HTTP server library</span><br><span class="line">	// will not do anything else with the connection.</span><br><span class="line">	//</span><br><span class="line">	// It becomes the caller&apos;s responsibility to manage</span><br><span class="line">	// and close the connection.</span><br><span class="line">	//</span><br><span class="line">	// The returned net.Conn may have read or write deadlines</span><br><span class="line">	// already set, depending on the configuration of the</span><br><span class="line">	// Server. It is the caller&apos;s responsibility to set</span><br><span class="line">	// or clear those deadlines as needed.</span><br><span class="line">	//</span><br><span class="line">	// The returned bufio.Reader may contain unprocessed buffered</span><br><span class="line">	// data from the client.</span><br><span class="line">	//</span><br><span class="line">	// After a call to Hijack, the original Request.Body must not</span><br><span class="line">	// be used. The original Request&apos;s Context remains valid and</span><br><span class="line">	// is not canceled until the Request&apos;s ServeHTTP method</span><br><span class="line">	// returns.</span><br><span class="line">	Hijack() (net.Conn, *bufio.ReadWriter, error)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用Hijack()方法，会将HTTP对应的TCP链接取出来，取出来之后，HTTP 服务就不在管这个链接了，需要由调用方去管理了。</p>
+<p>使用了Hijack之后，http的响应有什么不同呢</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">func main() &#123;</span><br><span class="line">	http.HandleFunc(&quot;/&quot;, handler2)</span><br><span class="line">	_ = http.ListenAndServe(&quot;:8008&quot;, nil)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func handler1(writer http.ResponseWriter, request *http.Request) &#123;</span><br><span class="line">	hijacker,_ := writer.(http.Hijacker)</span><br><span class="line">	conn, buf, _ := hijacker.Hijack()</span><br><span class="line">	defer conn.Close()</span><br><span class="line">	_, _ = buf.WriteString(&quot;hello world&quot;)</span><br><span class="line">	_ = buf.Flush()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func handler2(writer http.ResponseWriter, request *http.Request) &#123;</span><br><span class="line">	_, _ = fmt.Fprint(writer, &quot;hello world&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>handler1的响应<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ curl -i &quot;http://localhost:8008/&quot;</span><br><span class="line">hello world%</span><br></pre></td></tr></table></figure></p>
+<p>handler2的响应<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl -i &quot;http://localhost:8008/&quot;</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Fri, 24 Apr 2020 15:43:26 GMT</span><br><span class="line">Content-Length: 11</span><br><span class="line">Content-Type: text/plain; charset=utf-8</span><br><span class="line"></span><br><span class="line">hello world%</span><br></pre></td></tr></table></figure></p>
+<p>可以看出， Hijack 后 response header</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">func (c *conn) serve(ctx context.Context) &#123;</span><br><span class="line">    ...</span><br><span class="line">    serverHandler&#123;c.server&#125;.ServeHTTP(w, w.req)</span><br><span class="line">    w.cancelCtx()</span><br><span class="line">    if c.hijacked() &#123;</span><br><span class="line">      return</span><br><span class="line">    &#125;</span><br><span class="line">    w.finishRequest()</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是net/http包中的方法，也是http路由的核心方法。调用ServeHTTP（也就是上边的handle方法）方法，如果被hijack了就直接return了，而一般的http请求会经过后边的finishRequest方法，加入headers等并关闭连接。</p>
+<p>在Go中，Hijack方法的使用场景有两种</p>
+<ol>
+<li>基于HTTP的RPC</li>
+<li>从HTTP协议升级到WebSocket</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/19/Linux下开机自启动顺序之坑小记/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1701,165 +1862,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/22/MySQL数据类型补充/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="BansheeLW">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="厦门鱼肝油厂">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/22/MySQL数据类型补充/" itemprop="url">MySQL数据类型补充</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-22T23:03:00+08:00">
-                2018-08-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/MySQL/" itemprop="url" rel="index">
-                    <span itemprop="name">MySQL</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>我们知道，使用varchar类型存储时，需要使用1或2个字节记录字符串的长度：如果列的最大长度小于或等于255字节，则只使用一个字节表示，否则使用两个字节。</p>
-<blockquote>
-<p><strong>假设以下描述使用的都是UTF-8编码，存入英文字符。</strong></p>
-</blockquote>
-<p>即varchar(255)使用了256个字节，而varchar(256)则使用了258个字节。</p>
-<p>那么问题来了，我们在设计表的时候，如果不确定字段的最大长度，使用了变长字符串varchar类型，那么是不是不管三七二十一直接上varchar(255)呢（假设最大长度不超过255），按照之前的理论，varchar(10)和varchar(255)存储“hello”的空间开销都是一样的，即都是使用了5个字符的硬盘存储空间，但这个数据加载到内存的时候，就会使用固定大小的内存块来保存值。简单来说，就是两种方式在硬盘中存储空间开销并无二致，但在内存中就大有不同。</p>
-<p>varchar(10)在内存中使用10个字符的内存空间，varchar(255)在内存中使用255个字符的内存空间。这对于排序或者临时表（需要通过内存操作来实现）作业会产生比较大的不利影响。</p>
-<p>所以如果某些字段会涉及到文件排序或者基于磁盘的临时表时，分配VARCHAR数据类型时仍然不能够太过于慷慨。还是要评估实际需要的长度，然后选择一个最长的字段来设置字符长度。如果为了考虑冗余，可以留10%左右的字符长度。千万不能认为其为根据实际长度来分配存储空间，而随意的分配长度，或者说干脆使用最大的字符长度。</p>
-<p>另一个问题：varchar的允许的最大字节长度是65535字节，那么varchar(?)这个？最大能是多少呢。</p>
-<ul>
-<li>非空字段时：最大可以到65533,2个字节用于记录字符串长度</li>
-<li>可空字段：最大可以到65532，2个字节用于记录字符串长度，一个字节用于及记录 null 值。</li>
-</ul>
-<p>以上的结论是以UTF-8编码及全部存入英文字符为前提的理想状态，但实际上使用UTF-8时，varchar(?)到不了65532那么大，因为一个字符最大占用三个字节，MySQL默认存入以最大字节数来计算。</p>
-<p>所以最大到达21844，21845*3=65535字节，虽然符合最大字节限制，但没有空间存放字符串长度的记录了。</p>
-<p>查看数据库默认字符集<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &apos;character_set_database&apos;;</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| Variable_name          | Value |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">| character_set_database | utf8  |</span><br><span class="line">+------------------------+-------+</span><br><span class="line">1 row in set (0.01 sec)</span><br></pre></td></tr></table></figure></p>
-<p>将varchar设置为21844,创建成功<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create table test_varchar(v1 varchar(21844));</span><br><span class="line">Query OK, 0 rows affected (0.03 sec)</span><br></pre></td></tr></table></figure></p>
-<p>大于21844则报错<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; mysql&gt; create table &gt; create table test_varchar(v1 varchar(65535))&apos; at line 1</span><br><span class="line">mysql&gt; create table test_varchar(v1 varchar(65535));</span><br><span class="line">ERROR 1074 (42000): Column length too big for column &apos;v1&apos; (max = 21845); use BLOB or TEXT instead</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mysql&gt; create table test_varchar(v1 varchar(21845));</span><br><span class="line">ERROR 1118 (42000): Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535. This includes storage overhead, check the manual. You have to change some columns to TEXT or BLOBs</span><br></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1914,7 +1916,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1936,7 +1938,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1973,7 +1975,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
