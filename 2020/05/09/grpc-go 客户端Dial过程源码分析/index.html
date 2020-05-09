@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Golang RPC," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言：最近做了小组内的分享，是关于浅谈RPC与gRpc源码分析。所以将分享的记录发到个人博客上来。接下来的几篇文章都是gRPC源码分析的个人理解，如有错误，还烦请指出。 源码分析所用案例github仓库地址：https://github.com/BansheeLW/gRPCTest 客户端建立链接发送一次请求获取响应代码12345678910111213141516func main() &amp;#12">
+<meta name="keywords" content="Golang RPC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="grpc-go 客户端Dial过程源码分析">
+<meta property="og:url" content="http://yoursite.com/2020/05/09/grpc-go 客户端Dial过程源码分析/index.html">
+<meta property="og:site_name" content="厦门鱼肝油厂">
+<meta property="og:description" content="前言：最近做了小组内的分享，是关于浅谈RPC与gRpc源码分析。所以将分享的记录发到个人博客上来。接下来的几篇文章都是gRPC源码分析的个人理解，如有错误，还烦请指出。 源码分析所用案例github仓库地址：https://github.com/BansheeLW/gRPCTest 客户端建立链接发送一次请求获取响应代码12345678910111213141516func main() &amp;#12">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-05-09T15:45:25.111Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="grpc-go 客户端Dial过程源码分析">
+<meta name="twitter:description" content="前言：最近做了小组内的分享，是关于浅谈RPC与gRpc源码分析。所以将分享的记录发到个人博客上来。接下来的几篇文章都是gRPC源码分析的个人理解，如有错误，还烦请指出。 源码分析所用案例github仓库地址：https://github.com/BansheeLW/gRPCTest 客户端建立链接发送一次请求获取响应代码12345678910111213141516func main() &amp;#12">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/09/grpc-go 客户端Dial过程源码分析/"/>
+
+
+
+
+
+  <title>grpc-go 客户端Dial过程源码分析 | 厦门鱼肝油厂</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+          <a href="https://github.com/BansheeLW"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_green_007200.png" alt="Fork me on GitHub"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">厦门鱼肝油厂</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/09/grpc-go 客户端Dial过程源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">grpc-go 客户端Dial过程源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-09T23:44:13+08:00">
+                2020-05-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前言：最近做了小组内的分享，是关于浅谈RPC与gRpc源码分析。所以将分享的记录发到个人博客上来。接下来的几篇文章都是gRPC源码分析的个人理解，如有错误，还烦请指出。</p>
+<p>源码分析所用案例github仓库地址：<a href="https://github.com/BansheeLW/gRPCTest" target="_blank" rel="noopener">https://github.com/BansheeLW/gRPCTest</a></p>
+<p>客户端建立链接发送一次请求获取响应代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">func main() &#123;</span><br><span class="line">	conn, err := grpc.Dial(&quot;127.0.0.1:1235&quot;, grpc.WithInsecure())</span><br><span class="line">	defer conn.Close()</span><br><span class="line">	if err != nil&#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	client := server_hello_proto.NewTigerServiceClient(conn)</span><br><span class="line">	response, err := client.HelloTiger(context.Background(), &amp;server_hello_proto.HelloRequest&#123;</span><br><span class="line">		Name: &quot;ban&quot;,</span><br><span class="line">		Age:  11,</span><br><span class="line">	&#125;)</span><br><span class="line">	if err != nil&#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	log.Println(response)</span><br></pre></td></tr></table></figure></p>
+<p>首先来看 Dial函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// Dial creates a client connection to the given target.</span><br><span class="line">func Dial(target string, opts ...DialOption) (*ClientConn, error) &#123;</span><br><span class="line">	return DialContext(context.Background(), target, opts...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从Dial函数声明可以看出，Dial函数实际上是对DialContext的一层封装，Dial函数接收两个参数，target是连接地址，opts是可变长参数，接受一个元素类型为DialOptionl的切片。</p>
+<p>DialContext入参多了一个context</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// DialOption configures how we set up the connection.</span><br><span class="line">type DialOption interface &#123;</span><br><span class="line">	apply(*dialOptions)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出，DialOption是一个接口类型，有一个apply方法（接收一个dialOption的指针类型）。</p>
+<p>接下来看一下使用的地方<br><figure class="highlight plain"><figcaption><span>DialContext(ctx context.Context, target string, opts ...DialOption) (conn *ClientConn, err error) &#123;</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">	cc := &amp;ClientConn&#123;</span><br><span class="line">		target:            target,</span><br><span class="line">		csMgr:             &amp;connectivityStateManager&#123;&#125;,</span><br><span class="line">		conns:             make(map[*addrConn]struct&#123;&#125;),</span><br><span class="line">		dopts:             defaultDialOptions(),</span><br><span class="line">		blockingpicker:    newPickerWrapper(),</span><br><span class="line">		czData:            new(channelzData),</span><br><span class="line">		firstResolveEvent: grpcsync.NewEvent(),</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">	for _, opt := range opts &#123;</span><br><span class="line">		opt.apply(&amp;cc.dopts)</span><br><span class="line">	&#125;</span><br><span class="line">	....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在看一下grpc中如何生成实现DialOption接口的参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">// EmptyDialOption does not alter the dial configuration. It can be embedded in</span><br><span class="line">// another structure to build custom dial options.</span><br><span class="line">//</span><br><span class="line">// This API is EXPERIMENTAL.</span><br><span class="line">type EmptyDialOption struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">func (EmptyDialOption) apply(*dialOptions) &#123;&#125;</span><br><span class="line"></span><br><span class="line">// funcDialOption wraps a function that modifies dialOptions into an</span><br><span class="line">// implementation of the DialOption interface.</span><br><span class="line">type funcDialOption struct &#123;</span><br><span class="line">	f func(*dialOptions)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (fdo *funcDialOption) apply(do *dialOptions) &#123;</span><br><span class="line">	fdo.f(do)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func newFuncDialOption(f func(*dialOptions)) *funcDialOption &#123;</span><br><span class="line">	return &amp;funcDialOption&#123;</span><br><span class="line">		f: f,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>grpc包中提供了两个实现了DialOption的类型方便使用者去生成参数，特别是这个 funcDialOption 类型 ，提供了new方法得以让使用者去注入逻辑处理函数。</p>
+<p>我们在Dial中传入的参数，grpc.WithInsecure(),其函数体的逻辑就是调用newFuncDialOption函数传入一个对clientCoon的secure属性进行设置(关闭客户端连接校验)的函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// WithInsecure returns a DialOption which disables transport security for this</span><br><span class="line">// ClientConn. Note that transport security is required unless WithInsecure is</span><br><span class="line">// set.</span><br><span class="line">func WithInsecure() DialOption &#123;</span><br><span class="line">	return newFuncDialOption(func(o *dialOptions) &#123;</span><br><span class="line">		o.insecure = true</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们再来看一下dialOptions的定义<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">// dialOptions configure a Dial call. dialOptions are set by the DialOption</span><br><span class="line">// values passed to Dial.</span><br><span class="line">type dialOptions struct &#123;</span><br><span class="line">	unaryInt  UnaryClientInterceptor  //一元拦截器</span><br><span class="line">	streamInt StreamClientInterceptor //流式拦截器</span><br><span class="line">	</span><br><span class="line">	chainUnaryInts  []UnaryClientInterceptor</span><br><span class="line">	chainStreamInts []StreamClientInterceptor</span><br><span class="line"></span><br><span class="line">	cp          Compressor  //压缩</span><br><span class="line">	dc          Decompressor //解压缩</span><br><span class="line">	bs          internalbackoff.Strategy //重试策略</span><br><span class="line">	block       bool    //拨号是否阻塞</span><br><span class="line">	insecure    bool    //安全校验</span><br><span class="line">	timeout     time.Duration</span><br><span class="line">	scChan      &lt;-chan ServiceConfig</span><br><span class="line">	authority   string</span><br><span class="line">	copts       transport.ConnectOptions</span><br><span class="line">	callOptions []CallOption</span><br><span class="line">	// This is used by v1 balancer dial option WithBalancer to support v1</span><br><span class="line">	// balancer, and also by WithBalancerName dial option.</span><br><span class="line">	balancerBuilder             balancer.Builder</span><br><span class="line">	channelzParentID            int64</span><br><span class="line">	disableServiceConfig        bool</span><br><span class="line">	disableRetry                bool</span><br><span class="line">	disableHealthCheck          bool</span><br><span class="line">	healthCheckFunc             internal.HealthChecker</span><br><span class="line">	minConnectTimeout           func() time.Duration</span><br><span class="line">	defaultServiceConfig        *ServiceConfig // defaultServiceConfig is parsed from defaultServiceConfigRawJSON.</span><br><span class="line">	defaultServiceConfigRawJSON *string</span><br><span class="line">	// This is used by ccResolverWrapper to backoff between successive calls to</span><br><span class="line">	// resolver.ResolveNow(). The user will have no need to configure this, but</span><br><span class="line">	// we need to be able to configure this in tests.</span><br><span class="line">	resolveNowBackoff func(int) time.Duration</span><br><span class="line">	resolvers         []resolver.Builder</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>以上说了一堆，其实就是客户端拨号连接时，有一些默认配置，如果需要修改这些配置，就需要传递实现的了DialOption接口的类型值切片进来覆盖默认配置。gRPC包通过暴露接口的形式来实现对包内不可导出类型属性的修改。</p>
+<h4 id="ClientConn"><a href="#ClientConn" class="headerlink" title="ClientConn"></a>ClientConn</h4><p>整个Dial拨号调用过程中，ClientConn是最重要的类型，它是一个结构体类型。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">// ClientConn represents a virtual connection to a conceptual endpoint, to</span><br><span class="line">// perform RPCs.</span><br><span class="line">//</span><br><span class="line">// A ClientConn is free to have zero or more actual connections to the endpoint</span><br><span class="line">// based on configuration, load, etc. It is also free to determine which actual</span><br><span class="line">// endpoints to use and may change it every RPC, permitting client-side load</span><br><span class="line">// balancing.</span><br><span class="line">//</span><br><span class="line">// A ClientConn encapsulates a range of functionality including name</span><br><span class="line">// resolution, TCP connection establishment (with retries and backoff) and TLS</span><br><span class="line">// handshakes. It also handles errors on established connections by</span><br><span class="line">// re-resolving the name and reconnecting.</span><br><span class="line">type ClientConn struct &#123;</span><br><span class="line">	ctx    context.Context</span><br><span class="line">	cancel context.CancelFunc</span><br><span class="line"></span><br><span class="line">	target       string //目标地址</span><br><span class="line">	parsedTarget resolver.Target //地址解析器</span><br><span class="line">	authority    string</span><br><span class="line">	dopts        dialOptions //拨号建立链接相关参数</span><br><span class="line">	csMgr        *connectivityStateManager //链接状态管理器</span><br><span class="line"></span><br><span class="line">	balancerBuildOpts balancer.BuildOptions</span><br><span class="line">	blockingpicker    *pickerWrapper</span><br><span class="line"></span><br><span class="line">	mu              sync.RWMutex</span><br><span class="line">	resolverWrapper *ccResolverWrapper</span><br><span class="line">	sc              *ServiceConfig</span><br><span class="line">	conns           map[*addrConn]struct&#123;&#125;</span><br><span class="line">	// Keepalive parameter can be updated if a GoAway is received.</span><br><span class="line">	mkp             keepalive.ClientParameters //长连接保活相关</span><br><span class="line">	curBalancerName string</span><br><span class="line">	balancerWrapper *ccBalancerWrapper</span><br><span class="line">	retryThrottler  atomic.Value</span><br><span class="line"></span><br><span class="line">	firstResolveEvent *grpcsync.Event</span><br><span class="line"></span><br><span class="line">	channelzID int64 // channelz unique identification number</span><br><span class="line">	czData     *channelzData</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也就是说，ClientCoon是一个终端（客户端）逻辑TCP链接，用来执行RPC相关业务。它封装了一些功能：命名（目标地址）解析、建立TCP连接（带重试和回退），及建立连接过程中的一些错误处理。</p>
+<p>ClientCoon结构体包含dialOptions类型的字段，这个dialOptions结构体类型还有一个属性ConnectOptions需要我们关注下，这个结构体类型包含了所有与服务端交流是相关的参数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">// ConnectOptions covers all relevant options for communicating with the server.</span><br><span class="line">type ConnectOptions struct &#123;</span><br><span class="line">	// UserAgent is the application user agent.</span><br><span class="line">	UserAgent string</span><br><span class="line">	// Dialer specifies how to dial a network address.</span><br><span class="line">	Dialer func(context.Context, string) (net.Conn, error)</span><br><span class="line">	// FailOnNonTempDialError specifies if gRPC fails on non-temporary dial errors.</span><br><span class="line">	FailOnNonTempDialError bool</span><br><span class="line">	// PerRPCCredentials stores the PerRPCCredentials required to issue RPCs.</span><br><span class="line">	PerRPCCredentials []credentials.PerRPCCredentials</span><br><span class="line">	// TransportCredentials stores the Authenticator required to setup a client</span><br><span class="line">	// connection. Only one of TransportCredentials and CredsBundle is non-nil.</span><br><span class="line">	TransportCredentials credentials.TransportCredentials</span><br><span class="line">	// CredsBundle is the credentials bundle to be used. Only one of</span><br><span class="line">	// TransportCredentials and CredsBundle is non-nil.</span><br><span class="line">	CredsBundle credentials.Bundle</span><br><span class="line">	// KeepaliveParams stores the keepalive parameters.</span><br><span class="line">	KeepaliveParams keepalive.ClientParameters</span><br><span class="line">	// StatsHandler stores the handler for stats.</span><br><span class="line">	StatsHandler stats.Handler</span><br><span class="line">	// InitialWindowSize sets the initial window size for a stream.</span><br><span class="line">	InitialWindowSize int32</span><br><span class="line">	// InitialConnWindowSize sets the initial window size for a connection.</span><br><span class="line">	InitialConnWindowSize int32</span><br><span class="line">	// WriteBufferSize sets the size of write buffer which in turn determines how much data can be batched before it&apos;s written on the wire.</span><br><span class="line">	WriteBufferSize int</span><br><span class="line">	// ReadBufferSize sets the size of read buffer, which in turn determines how much data can be read at most for one read syscall.</span><br><span class="line">	ReadBufferSize int</span><br><span class="line">	// ChannelzParentID sets the addrConn id which initiate the creation of this client transport.</span><br><span class="line">	ChannelzParentID int64</span><br><span class="line">	// MaxHeaderListSize sets the max (uncompressed) size of header list that is prepared to be received.</span><br><span class="line">	MaxHeaderListSize *uint32</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="整体调用流程"><a href="#整体调用流程" class="headerlink" title="整体调用流程"></a>整体调用流程</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br></pre></td><td class="code"><pre><span class="line">func DialContext(ctx context.Context, target string, opts ...DialOption) (conn *ClientConn, err error) &#123;</span><br><span class="line">	cc := &amp;ClientConn&#123;</span><br><span class="line">		target:            target,</span><br><span class="line">		csMgr:             &amp;connectivityStateManager&#123;&#125;,</span><br><span class="line">		conns:             make(map[*addrConn]struct&#123;&#125;),</span><br><span class="line">		dopts:             defaultDialOptions(),</span><br><span class="line">		blockingpicker:    newPickerWrapper(),</span><br><span class="line">		czData:            new(channelzData),</span><br><span class="line">		firstResolveEvent: grpcsync.NewEvent(),</span><br><span class="line">	&#125;</span><br><span class="line">	cc.retryThrottler.Store((*retryThrottler)(nil))</span><br><span class="line">	cc.ctx, cc.cancel = context.WithCancel(context.Background())</span><br><span class="line"></span><br><span class="line">//连接相关默认配置覆盖</span><br><span class="line">	for _, opt := range opts &#123;</span><br><span class="line">		opt.apply(&amp;cc.dopts)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">//拦截器相关设置(将拦截器串联起来形成一个调用链，其实就是放入cc.dopts.chainUnaryInts或cc.dopts.chainStreamInts里)</span><br><span class="line">	chainUnaryClientInterceptors(cc)</span><br><span class="line">	chainStreamClientInterceptors(cc)</span><br><span class="line"></span><br><span class="line">	defer func() &#123;</span><br><span class="line">		if err != nil &#123;</span><br><span class="line">			cc.Close()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">// RPC运行时信息收集工具相关处理</span><br><span class="line">	if channelz.IsOn() &#123;</span><br><span class="line">		if cc.dopts.channelzParentID != 0 &#123;</span><br><span class="line">			cc.channelzID = channelz.RegisterChannel(&amp;channelzChannel&#123;cc&#125;, cc.dopts.channelzParentID, target)</span><br><span class="line">			channelz.AddTraceEvent(cc.channelzID, 0, &amp;channelz.TraceEventDesc&#123;</span><br><span class="line">				Desc:     &quot;Channel Created&quot;,</span><br><span class="line">				Severity: channelz.CtINFO,</span><br><span class="line">				Parent: &amp;channelz.TraceEventDesc&#123;</span><br><span class="line">					Desc:     fmt.Sprintf(&quot;Nested Channel(id:%d) created&quot;, cc.channelzID),</span><br><span class="line">					Severity: channelz.CtINFO,</span><br><span class="line">				&#125;,</span><br><span class="line">			&#125;)</span><br><span class="line">		&#125; else &#123;</span><br><span class="line">			cc.channelzID = channelz.RegisterChannel(&amp;channelzChannel&#123;cc&#125;, 0, target)</span><br><span class="line">			channelz.Info(cc.channelzID, &quot;Channel Created&quot;)</span><br><span class="line">		&#125;</span><br><span class="line">		cc.csMgr.channelzID = cc.channelzID</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">//tls连接加密证书相关检查</span><br><span class="line">	if !cc.dopts.insecure &#123;</span><br><span class="line">		if cc.dopts.copts.TransportCredentials == nil &amp;&amp; cc.dopts.copts.CredsBundle == nil &#123;</span><br><span class="line">			return nil, errNoTransportSecurity</span><br><span class="line">		&#125;</span><br><span class="line">		if cc.dopts.copts.TransportCredentials != nil &amp;&amp; cc.dopts.copts.CredsBundle != nil &#123;</span><br><span class="line">			return nil, errTransportCredsAndBundle</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		if cc.dopts.copts.TransportCredentials != nil || cc.dopts.copts.CredsBundle != nil &#123;</span><br><span class="line">			return nil, errCredentialsConflict</span><br><span class="line">		&#125;</span><br><span class="line">		for _, cd := range cc.dopts.copts.PerRPCCredentials &#123;</span><br><span class="line">			if cd.RequireTransportSecurity() &#123;</span><br><span class="line">				return nil, errTransportCredentialsMissing</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	// 如果提供了服务配置</span><br><span class="line">	if cc.dopts.defaultServiceConfigRawJSON != nil &#123;</span><br><span class="line">		scpr := parseServiceConfig(*cc.dopts.defaultServiceConfigRawJSON)</span><br><span class="line">		if scpr.Err != nil &#123;</span><br><span class="line">			return nil, fmt.Errorf(&quot;%s: %v&quot;, invalidDefaultServiceConfigErrPrefix, scpr.Err)</span><br><span class="line">		&#125;</span><br><span class="line">		// 设置默认服务配置</span><br><span class="line">		cc.dopts.defaultServiceConfig, _ = scpr.Config.(*ServiceConfig)</span><br><span class="line">	&#125;</span><br><span class="line">	//keepalive相关配置</span><br><span class="line">	cc.mkp = cc.dopts.copts.KeepaliveParams</span><br><span class="line"></span><br><span class="line">//如果没设置拨号函数，则使用默认的拨号函数，如果有设置代理的话，这个函数会根据系统环境变量(HTTP_PROXY或者HTTPS_PROXY)的代理设置来进行网络连接</span><br><span class="line">	if cc.dopts.copts.Dialer == nil &#123;</span><br><span class="line">		cc.dopts.copts.Dialer = newProxyDialer(</span><br><span class="line">			func(ctx context.Context, addr string) (net.Conn, error) &#123;</span><br><span class="line">				network, addr := parseDialTarget(addr)</span><br><span class="line">				return (&amp;net.Dialer&#123;&#125;).DialContext(ctx, network, addr)</span><br><span class="line">			&#125;,</span><br><span class="line">		)</span><br><span class="line">	&#125;</span><br><span class="line">    //UserAgent添加“grpcUA”</span><br><span class="line">	if cc.dopts.copts.UserAgent != &quot;&quot; &#123;</span><br><span class="line">		cc.dopts.copts.UserAgent += &quot; &quot; + grpcUA</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		cc.dopts.copts.UserAgent = grpcUA</span><br><span class="line">	&#125;</span><br><span class="line">    // 如果设置了超时</span><br><span class="line">	if cc.dopts.timeout &gt; 0 &#123;</span><br><span class="line">		var cancel context.CancelFunc</span><br><span class="line">		ctx, cancel = context.WithTimeout(ctx, cc.dopts.timeout)</span><br><span class="line">		defer cancel()</span><br><span class="line">	&#125;</span><br><span class="line">	defer func() &#123;</span><br><span class="line">		select &#123;</span><br><span class="line">		case &lt;-ctx.Done():</span><br><span class="line">			conn, err = nil, ctx.Err()</span><br><span class="line">		default:</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	scSet := false</span><br><span class="line">	// 如果提供了scChan，支持对serviceConfig进行热更</span><br><span class="line">	if cc.dopts.scChan != nil &#123;</span><br><span class="line">		// Try to get an initial service config.</span><br><span class="line">		select &#123;</span><br><span class="line">		case sc, ok := &lt;-cc.dopts.scChan:</span><br><span class="line">			if ok &#123;</span><br><span class="line">				cc.sc = &amp;sc</span><br><span class="line">				scSet = true// 成功获取初始的serviceConfig</span><br><span class="line">			&#125;</span><br><span class="line">		default:</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	// 提供retry时的退避算法</span><br><span class="line">	if cc.dopts.bs == nil &#123;</span><br><span class="line">		cc.dopts.bs = backoff.DefaultExponential</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    // resolverBuilder，用于解析target为目标服务列表</span><br><span class="line">	// Determine the resolver to use.</span><br><span class="line">	cc.parsedTarget = grpcutil.ParseTarget(cc.target)</span><br><span class="line">	channelz.Infof(cc.channelzID, &quot;parsed scheme: %q&quot;, cc.parsedTarget.Scheme)</span><br><span class="line">	resolverBuilder := cc.getResolver(cc.parsedTarget.Scheme)</span><br><span class="line">	if resolverBuilder == nil &#123;</span><br><span class="line">		// If resolver builder is still nil, the parsed target&apos;s scheme is</span><br><span class="line">		// not registered. Fallback to default resolver and set Endpoint to</span><br><span class="line">		// the original target.</span><br><span class="line">		channelz.Infof(cc.channelzID, &quot;scheme %q not registered, fallback to default scheme&quot;, cc.parsedTarget.Scheme)</span><br><span class="line">		cc.parsedTarget = resolver.Target&#123;</span><br><span class="line">			Scheme:   resolver.GetDefaultScheme(),</span><br><span class="line">			Endpoint: target,</span><br><span class="line">		&#125;</span><br><span class="line">		resolverBuilder = cc.getResolver(cc.parsedTarget.Scheme)</span><br><span class="line">		if resolverBuilder == nil &#123;</span><br><span class="line">			return nil, fmt.Errorf(&quot;could not get resolver for default scheme: %q&quot;, cc.parsedTarget.Scheme)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">    //连接证书</span><br><span class="line">	creds := cc.dopts.copts.TransportCredentials</span><br><span class="line">	if creds != nil &amp;&amp; creds.Info().ServerName != &quot;&quot; &#123;</span><br><span class="line">		cc.authority = creds.Info().ServerName</span><br><span class="line">	&#125; else if cc.dopts.insecure &amp;&amp; cc.dopts.authority != &quot;&quot; &#123;</span><br><span class="line">		cc.authority = cc.dopts.authority</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		// Use endpoint from &quot;scheme://authority/endpoint&quot; as the default</span><br><span class="line">		// authority for ClientConn.</span><br><span class="line">		cc.authority = cc.parsedTarget.Endpoint</span><br><span class="line">	&#125;</span><br><span class="line">	// 如果提供了scChan但是还没有获取到初始的serviceConfig，则阻塞等待serviceConfig</span><br><span class="line">	if cc.dopts.scChan != nil &amp;&amp; !scSet &#123;</span><br><span class="line">		// Blocking wait for the initial service config.</span><br><span class="line">		select &#123;</span><br><span class="line">		case sc, ok := &lt;-cc.dopts.scChan:</span><br><span class="line">			if ok &#123;</span><br><span class="line">				cc.sc = &amp;sc</span><br><span class="line">			&#125;</span><br><span class="line">		case &lt;-ctx.Done():</span><br><span class="line">			return nil, ctx.Err()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	// 启动子协程，监听scChan，进行serviceConfig的热更</span><br><span class="line">	if cc.dopts.scChan != nil &#123;</span><br><span class="line">		go cc.scWatcher()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	var credsClone credentials.TransportCredentials</span><br><span class="line">	if creds := cc.dopts.copts.TransportCredentials; creds != nil &#123;</span><br><span class="line">		credsClone = creds.Clone()</span><br><span class="line">	&#125;</span><br><span class="line">	cc.balancerBuildOpts = balancer.BuildOptions&#123;</span><br><span class="line">		DialCreds:        credsClone,</span><br><span class="line">		CredsBundle:      cc.dopts.copts.CredsBundle,</span><br><span class="line">		Dialer:           cc.dopts.copts.Dialer,</span><br><span class="line">		ChannelzParentID: cc.channelzID,</span><br><span class="line">		Target:           cc.parsedTarget,</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	// Build the resolver.</span><br><span class="line">	rWrapper, err := newCCResolverWrapper(cc, resolverBuilder)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		return nil, fmt.Errorf(&quot;failed to build resolver: %v&quot;, err)</span><br><span class="line">	&#125;</span><br><span class="line">	cc.mu.Lock()</span><br><span class="line">	cc.resolverWrapper = rWrapper</span><br><span class="line">	cc.mu.Unlock()</span><br><span class="line"></span><br><span class="line">	// A blocking dial blocks until the clientConn is ready.</span><br><span class="line">	// 默认Dial不会等待网络连接完成，如果指定了blcok，则会阻塞等待网络连接完成才返回</span><br><span class="line">	if cc.dopts.block &#123;</span><br><span class="line">		for &#123;</span><br><span class="line">			s := cc.GetState()</span><br><span class="line">			if s == connectivity.Ready &#123;</span><br><span class="line">				break</span><br><span class="line">			&#125; else if cc.dopts.copts.FailOnNonTempDialError &amp;&amp; s == connectivity.TransientFailure &#123;</span><br><span class="line">				if err = cc.blockingpicker.connectionError(); err != nil &#123;</span><br><span class="line">					terr, ok := err.(interface &#123;</span><br><span class="line">						Temporary() bool</span><br><span class="line">					&#125;)</span><br><span class="line">					if ok &amp;&amp; !terr.Temporary() &#123;</span><br><span class="line">						return nil, err</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			if !cc.WaitForStateChange(ctx, s) &#123;</span><br><span class="line">				// ctx got timeout or canceled.</span><br><span class="line">				return nil, ctx.Err()</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	return cc, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以，从以上代码可以看出，调用Dial函数实际上是调用了DialContext函数，而DialContext主要是对 ConnectCoon结构体、 dialOptions结构体（cc.dopts）及ConnectOptions结构体（cc.dopts.copts）做初始化操作。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang-RPC/" rel="tag"># Golang RPC</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/09/RPC概述/" rel="next" title="RPC-个人碎碎念">
+                <i class="fa fa-chevron-left"></i> RPC-个人碎碎念
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/09/grpc-go 客户端invoke调用源码分析/" rel="prev" title="grpc-go 客户端invoke调用源码分析">
+                grpc-go 客户端invoke调用源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.jpg"
+                alt="BansheeLW" />
+            
+              <p class="site-author-name" itemprop="name">BansheeLW</p>
+              <p class="site-description motion-element" itemprop="description">太阳落山了，我是你的渔船，你的锚</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#ClientConn"><span class="nav-number">1.</span> <span class="nav-text">ClientConn</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#整体调用流程"><span class="nav-number"></span> <span class="nav-text">整体调用流程</span></a></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BansheeLW</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

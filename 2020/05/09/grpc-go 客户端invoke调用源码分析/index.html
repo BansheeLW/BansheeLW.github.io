@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Golang RPC," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1234567891011121314151617func main() &amp;#123;	conn, err := grpc.Dial(&amp;quot;127.0.0.1:1235&amp;quot;, grpc.WithInsecure())	defer conn.Close()	if err != nil&amp;#123;		log.Fatal(err)	&amp;#125;	client := server_hello">
+<meta name="keywords" content="Golang RPC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="grpc-go 客户端invoke调用源码分析">
+<meta property="og:url" content="http://yoursite.com/2020/05/09/grpc-go 客户端invoke调用源码分析/index.html">
+<meta property="og:site_name" content="厦门鱼肝油厂">
+<meta property="og:description" content="1234567891011121314151617func main() &amp;#123;	conn, err := grpc.Dial(&amp;quot;127.0.0.1:1235&amp;quot;, grpc.WithInsecure())	defer conn.Close()	if err != nil&amp;#123;		log.Fatal(err)	&amp;#125;	client := server_hello">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-05-09T15:47:01.098Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="grpc-go 客户端invoke调用源码分析">
+<meta name="twitter:description" content="1234567891011121314151617func main() &amp;#123;	conn, err := grpc.Dial(&amp;quot;127.0.0.1:1235&amp;quot;, grpc.WithInsecure())	defer conn.Close()	if err != nil&amp;#123;		log.Fatal(err)	&amp;#125;	client := server_hello">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/09/grpc-go 客户端invoke调用源码分析/"/>
+
+
+
+
+
+  <title>grpc-go 客户端invoke调用源码分析 | 厦门鱼肝油厂</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+          <a href="https://github.com/BansheeLW"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_green_007200.png" alt="Fork me on GitHub"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">厦门鱼肝油厂</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/09/grpc-go 客户端invoke调用源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">grpc-go 客户端invoke调用源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-09T23:46:00+08:00">
+                2020-05-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">func main() &#123;</span><br><span class="line">	conn, err := grpc.Dial(&quot;127.0.0.1:1235&quot;, grpc.WithInsecure())</span><br><span class="line">	defer conn.Close()</span><br><span class="line">	if err != nil&#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	client := server_hello_proto.NewTigerServiceClient(conn)</span><br><span class="line">	response, err := client.HelloTiger(context.Background(), &amp;server_hello_proto.HelloRequest&#123;</span><br><span class="line">		Name: &quot;ban&quot;,</span><br><span class="line">		Age:  11,</span><br><span class="line">	&#125;)</span><br><span class="line">	if err != nil&#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	log.Println(response)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上一篇我们分析了Dial建立连接的流程。现在继续往下分析。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client := server_hello_proto.NewTigerServiceClient(conn)</span><br></pre></td></tr></table></figure>
+<p>这里是使用pb文件的代码去新建一个连接client，其实也就是使用一个结构体类型(TigerServiceClient)的值保存clientConn连接属性。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">type tigerServiceClient struct &#123;</span><br><span class="line">	cc *grpc.ClientConn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个TigerServiceClient类型实现了TigerServiceClient接口，也就是实现了根据proto定义的rppc service 接口编译自动生成的客户端stub api接口。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">type TigerServiceClient interface &#123;</span><br><span class="line">	HelloTiger(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>HelloTiger这个方法入参有三个，查看grpc.CallOption这个参数类型，这是一个接口类型<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// CallOption configures a Call before it starts or extracts information from</span><br><span class="line">// a Call after it completes.</span><br><span class="line">type CallOption interface &#123;</span><br><span class="line">	// before is called before the call is sent to any server.  If before</span><br><span class="line">	// returns a non-nil error, the RPC fails with that error.</span><br><span class="line">	before(*callInfo) error</span><br><span class="line"></span><br><span class="line">	// after is called after the call has completed.  after cannot return an</span><br><span class="line">	// error, so any failures should be reported via output parameters.</span><br><span class="line">	after(*callInfo)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个接口类型有before和after方法，我们可以实现这个接口，在RPC方法调用前后会调用before和after方法去执行我们的实现逻辑。</p>
+<p>然后我们再看客户端stub api的方法实现<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">func (c *tigerServiceClient) HelloTiger(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error) &#123;</span><br><span class="line">	out := new(HelloResponse)</span><br><span class="line">	err := c.cc.Invoke(ctx, &quot;/server_hello_proto.TigerService/HelloTiger&quot;, in, out, opts...)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		return nil, err</span><br><span class="line">	&#125;</span><br><span class="line">	return out, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这里的核心是Invoke调用，也就是本篇分析的重点。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">// Invoke sends the RPC request on the wire and returns after response is</span><br><span class="line">// received.  This is typically called by generated code.</span><br><span class="line">// Invoke 在逻辑链接ClientCoon上发送RPC请求，收到响应后返回。Invoke通常由proto代码生成工具生成的stub代码发起调用</span><br><span class="line">//</span><br><span class="line">// All errors returned by Invoke are compatible with the status package.</span><br><span class="line">//所有Invoke调用返回的错误都与 status 包兼容</span><br><span class="line">func (cc *ClientConn) Invoke(ctx context.Context, method string, args, reply interface&#123;&#125;, opts ...CallOption) error &#123;</span><br><span class="line">	// allow interceptor to see all applicable call options, which means those</span><br><span class="line">	// configured as defaults from dial option as well as per-call options</span><br><span class="line">	//将Dial初始化的callOption与Invoke调用传入的callOption合并到一个切片，允许拦截器去访问这些调用可选配置callOptions</span><br><span class="line">	opts = combine(cc.dopts.callOptions, opts)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	if cc.dopts.unaryInt != nil &#123;</span><br><span class="line">	    //拦截器不为空，就调用这个方法（实际上也要调用invoke函数）</span><br><span class="line">		return cc.dopts.unaryInt(ctx, method, args, reply, cc, invoke, opts...)</span><br><span class="line">	&#125;</span><br><span class="line">	//拦截器为空，直接调用invoke函数</span><br><span class="line">	return invoke(ctx, method, args, reply, cc, opts...)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>invoke函数声明<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">func invoke(ctx context.Context, method string, req, reply interface&#123;&#125;, cc *ClientConn, opts ...CallOption) error &#123;</span><br><span class="line">//获取传输层 Trasport 并组合封装到 ClientStream 中返回，在这块会涉及负载均衡、超时控制、 Encoding、 Stream 的动作，与服务端基本一致的行为。</span><br><span class="line">	cs, err := newClientStream(ctx, unaryStreamDesc, cc, method, opts...)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line">	//发送请求</span><br><span class="line">	if err := cs.SendMsg(req); err != nil &#123;</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line">	//返回响应</span><br><span class="line">	return cs.RecvMsg(reply)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>创建客户端流对象时，会循环调用callOption的before方法，做一些发送请求前的处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">for _, o := range opts &#123;</span><br><span class="line">	if err := o.before(c); err != nil &#123;</span><br><span class="line">		return nil, toRPCErr(err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>发送请求SendMsg方法声明<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">func (cs *clientStream) SendMsg(m interface&#123;&#125;) (err error) &#123;</span><br><span class="line">	defer func() &#123;</span><br><span class="line">		if err != nil &amp;&amp; err != io.EOF &#123;</span><br><span class="line">			// Call finish on the client stream for errors generated by this SendMsg</span><br><span class="line">			// call, as these indicate problems created by this client.  (Transport</span><br><span class="line">			// errors are converted to an io.EOF error in csAttempt.sendMsg; the real</span><br><span class="line">			// error will be returned from RecvMsg eventually in that case, or be</span><br><span class="line">			// retried.)</span><br><span class="line">			cs.finish(err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	// 判断客户端流是否已关闭</span><br><span class="line">	if cs.sentLast &#123;</span><br><span class="line">		return status.Errorf(codes.Internal, &quot;SendMsg called after CloseSend&quot;)</span><br><span class="line">	&#125;</span><br><span class="line">	// 判断当前流是否是客户端流</span><br><span class="line">	if !cs.desc.ClientStreams &#123;</span><br><span class="line">		cs.sentLast = true</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    //对请求信息预处理，序列化、压缩，生成</span><br><span class="line">	// load hdr, payload, data</span><br><span class="line">	hdr, payload, data, err := prepareMsg(m, cs.codec, cs.cp, cs.comp)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	// TODO(dfawley): should we be checking len(data) instead?</span><br><span class="line">	//判断压缩+序列化后的消息体总字节长度是否大于预设的 maxSendMessageSize（预设值为 math.MaxInt32），若超出则提示错误</span><br><span class="line">	if len(payload) &gt; *cs.callInfo.maxSendMessageSize &#123;</span><br><span class="line">		return status.Errorf(codes.ResourceExhausted, &quot;trying to send message larger than max (%d vs. %d)&quot;, len(payload), *cs.callInfo.maxSendMessageSize)</span><br><span class="line">	&#125;</span><br><span class="line">	msgBytes := data // Store the pointer before setting to nil. For binary logging.</span><br><span class="line">	// 创建发送消息的函数</span><br><span class="line">	op := func(a *csAttempt) error &#123;</span><br><span class="line">	    //真正发送数据的地方</span><br><span class="line">		err := a.sendMsg(m, hdr, payload, data)</span><br><span class="line">		// nil out the message and uncomp when replaying; they are only needed for</span><br><span class="line">		// stats which is disabled for subsequent attempts.</span><br><span class="line">		m, data = nil, nil</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line">	// 开始发送（带重试机制）</span><br><span class="line">	err = cs.withRetry(op, func() &#123; cs.bufferForRetryLocked(len(hdr)+len(payload), op) &#125;)</span><br><span class="line">	if cs.binlog != nil &amp;&amp; err == nil &#123;</span><br><span class="line">		cs.binlog.Log(&amp;binarylog.ClientMessage&#123;</span><br><span class="line">			OnClientSide: true,</span><br><span class="line">			Message:      msgBytes,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>客户端流对象接收响应信息方法声明<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">func (cs *clientStream) RecvMsg(m interface&#123;&#125;) error &#123;</span><br><span class="line">	if cs.binlog != nil &amp;&amp; !cs.serverHeaderBinlogged &#123;</span><br><span class="line">		// Call Header() to binary log header if it&apos;s not already logged.</span><br><span class="line">		cs.Header()</span><br><span class="line">	&#125;</span><br><span class="line">	var recvInfo *payloadInfo</span><br><span class="line">	if cs.binlog != nil &#123;</span><br><span class="line">		recvInfo = &amp;payloadInfo&#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	  //接收服务端结果，并且反序列化，填充到m对象上，m就是返回值</span><br><span class="line">	err := cs.withRetry(func(a *csAttempt) error &#123;</span><br><span class="line">		return a.recvMsg(m, recvInfo)</span><br><span class="line">	&#125;, cs.commitAttemptLocked)</span><br><span class="line">	if cs.binlog != nil &amp;&amp; err == nil &#123;</span><br><span class="line">		cs.binlog.Log(&amp;binarylog.ServerMessage&#123;</span><br><span class="line">			OnClientSide: true,</span><br><span class="line">			Message:      recvInfo.uncompressedBytes,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	if err != nil || !cs.desc.ServerStreams &#123;</span><br><span class="line">		// err != nil or non-server-streaming indicates end of stream.</span><br><span class="line">		cs.finish(err)</span><br><span class="line"></span><br><span class="line">		if cs.binlog != nil &#123;</span><br><span class="line">			// finish will not log Trailer. Log Trailer here.</span><br><span class="line">			logEntry := &amp;binarylog.ServerTrailer&#123;</span><br><span class="line">				OnClientSide: true,</span><br><span class="line">				Trailer:      cs.Trailer(),</span><br><span class="line">				Err:          err,</span><br><span class="line">			&#125;</span><br><span class="line">			if logEntry.Err == io.EOF &#123;</span><br><span class="line">				logEntry.Err = nil</span><br><span class="line">			&#125;</span><br><span class="line">			if peer, ok := peer.FromContext(cs.Context()); ok &#123;</span><br><span class="line">				logEntry.PeerAddr = peer.Addr</span><br><span class="line">			&#125;</span><br><span class="line">			cs.binlog.Log(logEntry)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	return err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang-RPC/" rel="tag"># Golang RPC</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/09/grpc-go 客户端Dial过程源码分析/" rel="next" title="grpc-go 客户端Dial过程源码分析">
+                <i class="fa fa-chevron-left"></i> grpc-go 客户端Dial过程源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/09/grpc-go 服务端接收请求响应源码分析/" rel="prev" title="grpc-go 服务端接收请求响应源码分析">
+                grpc-go 服务端接收请求响应源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.jpg"
+                alt="BansheeLW" />
+            
+              <p class="site-author-name" itemprop="name">BansheeLW</p>
+              <p class="site-description motion-element" itemprop="description">太阳落山了，我是你的渔船，你的锚</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BansheeLW</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

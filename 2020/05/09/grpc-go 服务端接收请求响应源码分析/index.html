@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Golang RPC," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="服务端代码12345678910111213141516171819type TigerServer struct &amp;#123;&amp;#125;func (t *TigerServer) HelloTiger(ctx context.Context,req *server_hello_proto.HelloRequest) ( *server_hello_proto.HelloResponse,  e">
+<meta name="keywords" content="Golang RPC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="grpc-go 服务端接收请求响应源码分析">
+<meta property="og:url" content="http://yoursite.com/2020/05/09/grpc-go 服务端接收请求响应源码分析/index.html">
+<meta property="og:site_name" content="厦门鱼肝油厂">
+<meta property="og:description" content="服务端代码12345678910111213141516171819type TigerServer struct &amp;#123;&amp;#125;func (t *TigerServer) HelloTiger(ctx context.Context,req *server_hello_proto.HelloRequest) ( *server_hello_proto.HelloResponse,  e">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-05-09T15:49:52.551Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="grpc-go 服务端接收请求响应源码分析">
+<meta name="twitter:description" content="服务端代码12345678910111213141516171819type TigerServer struct &amp;#123;&amp;#125;func (t *TigerServer) HelloTiger(ctx context.Context,req *server_hello_proto.HelloRequest) ( *server_hello_proto.HelloResponse,  e">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/05/09/grpc-go 服务端接收请求响应源码分析/"/>
+
+
+
+
+
+  <title>grpc-go 服务端接收请求响应源码分析 | 厦门鱼肝油厂</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+          <a href="https://github.com/BansheeLW"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_green_007200.png" alt="Fork me on GitHub"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">厦门鱼肝油厂</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/09/grpc-go 服务端接收请求响应源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">grpc-go 服务端接收请求响应源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-09T23:47:25+08:00">
+                2020-05-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>服务端代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">type TigerServer struct &#123;&#125;</span><br><span class="line"></span><br><span class="line">func (t *TigerServer) HelloTiger(ctx context.Context,req *server_hello_proto.HelloRequest) ( *server_hello_proto.HelloResponse,  error) &#123;</span><br><span class="line">	resp := &amp;server_hello_proto.HelloResponse&#123;&#125;</span><br><span class="line">	resp.Name = req.Name</span><br><span class="line">	resp.Age = req.Age + 11</span><br><span class="line">	return resp,nil</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	grpcServer := grpc.NewServer()</span><br><span class="line">	server_hello_proto.RegisterTigerServiceServer(grpcServer,new(TigerServer))</span><br><span class="line"></span><br><span class="line">	listener, err := net.Listen(&quot;tcp&quot;, &quot;127.0.0.1:1235&quot;)</span><br><span class="line">	if err != nil&#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line">	_ = grpcServer.Serve(listener)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从以上代码可以看出，开启一个gRPC服务的代码非常简洁</p>
+<ol>
+<li>实例化一个grpc.Server</li>
+<li>将实现了pb文件中service接口的服务对象注册进grpc.Server</li>
+<li>监听端口</li>
+<li>接收连接请求</li>
+</ol>
+<h3 id="实例化server"><a href="#实例化server" class="headerlink" title="实例化server"></a>实例化server</h3><p>首先我们来看实例化一个server做了些什么操作<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// NewServer creates a gRPC server which has no service registered and has not</span><br><span class="line">// started to accept requests yet.</span><br><span class="line">func NewServer(opt ...ServerOption) *Server &#123;</span><br><span class="line">	opts := defaultServerOptions</span><br><span class="line">	for _, o := range opt &#123;</span><br><span class="line">		o.apply(&amp;opts)</span><br><span class="line">	&#125;</span><br><span class="line">	s := &amp;Server&#123;</span><br><span class="line">		lis:    make(map[net.Listener]bool),</span><br><span class="line">		opts:   opts,</span><br><span class="line">		conns:  make(map[transport.ServerTransport]bool),</span><br><span class="line">		m:      make(map[string]*service),</span><br><span class="line">		quit:   grpcsync.NewEvent(),</span><br><span class="line">		done:   grpcsync.NewEvent(),</span><br><span class="line">		czData: new(channelzData),</span><br><span class="line">	&#125;</span><br><span class="line">	chainUnaryServerInterceptors(s)</span><br><span class="line">	chainStreamServerInterceptors(s)</span><br><span class="line">	s.cv = sync.NewCond(&amp;s.mu)</span><br><span class="line">	if EnableTracing &#123;</span><br><span class="line">		_, file, line, _ := runtime.Caller(1)</span><br><span class="line">		s.events = trace.NewEventLog(&quot;grpc.Server&quot;, fmt.Sprintf(&quot;%s:%d&quot;, file, line))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	if channelz.IsOn() &#123;</span><br><span class="line">		s.channelzID = channelz.RegisterServer(&amp;channelzServer&#123;s&#125;, &quot;&quot;)</span><br><span class="line">	&#125;</span><br><span class="line">	return s</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，这个函数与客户端Dial的处理流程很相似，都是接收一个可变参数用于覆盖默认配置，然后是初始化grpc.Server结构体，拦截器相关处理及一些grpc调用监控相关的初始化处理。</p>
+<p>这里最关键的就是初始化grpc.Server结构体了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">type Server struct &#123;</span><br><span class="line">	opts serverOptions //服务端可选配置项</span><br><span class="line"></span><br><span class="line">	mu     sync.Mutex // guards following</span><br><span class="line">	lis    map[net.Listener]bool //监听地址列表</span><br><span class="line">	conns  map[transport.ServerTransport]bool //连接列表</span><br><span class="line">	serve  bool</span><br><span class="line">	drain  bool</span><br><span class="line">	cv     *sync.Cond          // signaled when connections close for GracefulStop</span><br><span class="line">	m      map[string]*service // service name -&gt; service info //一个映射，通过service对象名找到这个service对象的信息</span><br><span class="line">	events trace.EventLog</span><br><span class="line"></span><br><span class="line">	quit               *grpcsync.Event</span><br><span class="line">	done               *grpcsync.Event</span><br><span class="line">	channelzRemoveOnce sync.Once</span><br><span class="line">	serveWG            sync.WaitGroup // counts active Serve goroutines for GracefulStop</span><br><span class="line"></span><br><span class="line">	channelzID int64 // channelz unique identification number</span><br><span class="line">	czData     *channelzData</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>服务端可选配置项<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">type serverOptions struct &#123;</span><br><span class="line">	creds                 credentials.TransportCredentials    //加密证书相关（TLS)</span><br><span class="line">	codec                 baseCodec //序列化，如protobuf</span><br><span class="line">	cp                    Compressor //压缩 gzip</span><br><span class="line">	dc                    Decompressor //解压缩 gzip</span><br><span class="line">	unaryInt              UnaryServerInterceptor //单次拦截器</span><br><span class="line">	streamInt             StreamServerInterceptor //流式拦截器</span><br><span class="line">	chainUnaryInts        []UnaryServerInterceptor</span><br><span class="line">	chainStreamInts       []StreamServerInterceptor</span><br><span class="line">	inTapHandle           tap.ServerInHandle</span><br><span class="line">	statsHandler          stats.Handler</span><br><span class="line">	//HTTP2 协议相关规范</span><br><span class="line">	maxConcurrentStreams  uint32</span><br><span class="line">	maxReceiveMessageSize int</span><br><span class="line">	maxSendMessageSize    int</span><br><span class="line">	unknownStreamDesc     *StreamDesc</span><br><span class="line">	//长连接保活相关，客户端会专门起一个goroutine去处理长连接事宜</span><br><span class="line">	keepaliveParams       keepalive.ServerParameters</span><br><span class="line">	keepalivePolicy       keepalive.EnforcementPolicy</span><br><span class="line">	initialWindowSize     int32</span><br><span class="line">	initialConnWindowSize int32</span><br><span class="line">	writeBufferSize       int</span><br><span class="line">	readBufferSize        int</span><br><span class="line">	connectionTimeout     time.Duration</span><br><span class="line">	maxHeaderListSize     *uint32</span><br><span class="line">	headerTableSize       *uint32</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="将注册服务对象注册进server"><a href="#将注册服务对象注册进server" class="headerlink" title="将注册服务对象注册进server"></a>将注册服务对象注册进server</h3><p>将服务对象注册进server的函数是pb文件中用protoc代码生成插件protoc-gen-go工具自动生成的。</p>
+<p>pb文件中服务端相关代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// 服务描述</span><br><span class="line">var _TigerService_serviceDesc = grpc.ServiceDesc&#123;</span><br><span class="line">	ServiceName: &quot;server_hello_proto.TigerService&quot;, //服务名</span><br><span class="line">	HandlerType: (*TigerServiceServer)(nil), //这里申明了该服务需要实现的接口</span><br><span class="line">	Methods: []grpc.MethodDesc&#123; //服务方法描述</span><br><span class="line">		&#123;</span><br><span class="line">			MethodName: &quot;HelloTiger&quot;, //rpc方法名</span><br><span class="line">			Handler:    _TigerService_HelloTiger_Handler,//rpc请求的handler</span><br><span class="line">		&#125;,</span><br><span class="line">		&#123;</span><br><span class="line">			MethodName: &quot;FeedTiger&quot;,</span><br><span class="line">			Handler:    _TigerService_FeedTiger_Handler,</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;,</span><br><span class="line">	Streams: []grpc.StreamDesc&#123;</span><br><span class="line">		&#123;</span><br><span class="line">			StreamName:    &quot;Channel&quot;,</span><br><span class="line">			Handler:       _TigerService_Channel_Handler,</span><br><span class="line">			ServerStreams: true,</span><br><span class="line">			ClientStreams: true,</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;,</span><br><span class="line">	Metadata: &quot;hello.proto&quot;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func RegisterTigerServiceServer(s *grpc.Server, srv TigerServiceServer) &#123;</span><br><span class="line">        //传入服务描述及具体的服务实现对象</span><br><span class="line">	s.RegisterService(&amp;_TigerService_serviceDesc, srv)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>以下代码可以看出，实际上还是调用grpc包中的注册方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">// RegisterService registers a service and its implementation to the gRPC</span><br><span class="line">// server. It is called from the IDL generated code. This must be called before</span><br><span class="line">// invoking Serve.</span><br><span class="line">// 这个方法由IDL（也就是protobuf）通过插件生成的代码调用。这个调用必须要在Server开始接受请求之前调用</span><br><span class="line">//这段代码主要是判断具体服务是否实现了服务接口</span><br><span class="line">func (s *Server) RegisterService(sd *ServiceDesc, ss interface&#123;&#125;) &#123;</span><br><span class="line">	ht := reflect.TypeOf(sd.HandlerType).Elem()</span><br><span class="line">	st := reflect.TypeOf(ss)</span><br><span class="line">	if !st.Implements(ht) &#123;</span><br><span class="line">		grpclog.Fatalf(&quot;grpc: Server.RegisterService found the handler of type %v that does not satisfy %v&quot;, st, ht)</span><br><span class="line">	&#125;</span><br><span class="line">	s.register(sd, ss)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (s *Server) register(sd *ServiceDesc, ss interface&#123;&#125;) &#123;</span><br><span class="line">	s.mu.Lock()</span><br><span class="line">	defer s.mu.Unlock()</span><br><span class="line">	s.printf(&quot;RegisterService(%q)&quot;, sd.ServiceName)</span><br><span class="line">	//如果server已经运行了，不允许注册</span><br><span class="line">	if s.serve &#123;</span><br><span class="line">		grpclog.Fatalf(&quot;grpc: Server.RegisterService after Server.Serve for %q&quot;, sd.ServiceName)</span><br><span class="line">	&#125;</span><br><span class="line">	//不允许注册相同名字的服务</span><br><span class="line">	if _, ok := s.m[sd.ServiceName]; ok &#123;</span><br><span class="line">		grpclog.Fatalf(&quot;grpc: Server.RegisterService found duplicate service registration for %q&quot;, sd.ServiceName)</span><br><span class="line">	&#125;</span><br><span class="line">	srv := &amp;service&#123;</span><br><span class="line">		server: ss,</span><br><span class="line">		md:     make(map[string]*MethodDesc),</span><br><span class="line">		sd:     make(map[string]*StreamDesc),</span><br><span class="line">		mdata:  sd.Metadata,</span><br><span class="line">	&#125;</span><br><span class="line">	for i := range sd.Methods &#123;</span><br><span class="line">		d := &amp;sd.Methods[i]</span><br><span class="line">		srv.md[d.MethodName] = d</span><br><span class="line">	&#125;</span><br><span class="line">	for i := range sd.Streams &#123;</span><br><span class="line">		d := &amp;sd.Streams[i]</span><br><span class="line">		srv.sd[d.StreamName] = d</span><br><span class="line">	&#125;</span><br><span class="line">	s.m[sd.ServiceName] = srv</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，register主要是将服务名和具体服务信息添加进Server的属性映射m，也就是服务名与具体服务信息的映射，相当于是http web中的路由表。</p>
+<h3 id="server开始监听并接收请求"><a href="#server开始监听并接收请求" class="headerlink" title="server开始监听并接收请求"></a>server开始监听并接收请求</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line">// Serve accepts incoming connections on the listener lis, creating a new</span><br><span class="line">// ServerTransport and service goroutine for each. The service goroutines</span><br><span class="line">// read gRPC requests and then call the registered handlers to reply to them.</span><br><span class="line">// Serve returns when lis.Accept fails with fatal errors.  lis will be closed when</span><br><span class="line">// this method returns.</span><br><span class="line">// Serve will return a non-nil error unless Stop or GracefulStop is called.</span><br><span class="line">func (s *Server) Serve(lis net.Listener) error &#123;</span><br><span class="line">	s.mu.Lock()</span><br><span class="line">	s.printf(&quot;serving&quot;)</span><br><span class="line">	//置为true，则标志着Server真正开始运行</span><br><span class="line">	s.serve = true</span><br><span class="line">	if s.lis == nil &#123;</span><br><span class="line">		// Serve called after Stop or GracefulStop.</span><br><span class="line">		s.mu.Unlock()</span><br><span class="line">		lis.Close()</span><br><span class="line">		return ErrServerStopped</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	s.serveWG.Add(1)</span><br><span class="line">	defer func() &#123;</span><br><span class="line">		s.serveWG.Done()</span><br><span class="line">		if s.quit.HasFired() &#123;</span><br><span class="line">			// Stop or GracefulStop called; block until done and return nil.</span><br><span class="line">			&lt;-s.done.Done()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">    //一个Server可以监听多个端口</span><br><span class="line">	ls := &amp;listenSocket&#123;Listener: lis&#125;</span><br><span class="line">	s.lis[ls] = true</span><br><span class="line"></span><br><span class="line">	if channelz.IsOn() &#123;</span><br><span class="line">		ls.channelzID = channelz.RegisterListenSocket(ls, s.channelzID, lis.Addr().String())</span><br><span class="line">	&#125;</span><br><span class="line">	s.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    //退出时，将lis映射中的ls监听删除</span><br><span class="line">	defer func() &#123;</span><br><span class="line">		s.mu.Lock()</span><br><span class="line">		if s.lis != nil &amp;&amp; s.lis[ls] &#123;</span><br><span class="line">			ls.Close()</span><br><span class="line">			delete(s.lis, ls)</span><br><span class="line">		&#125;</span><br><span class="line">		s.mu.Unlock()</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	var tempDelay time.Duration // how long to sleep on accept failure</span><br><span class="line"></span><br><span class="line">	for &#123;</span><br><span class="line">		rawConn, err := lis.Accept()</span><br><span class="line">		if err != nil &#123;</span><br><span class="line">			if ne, ok := err.(interface &#123;</span><br><span class="line">				Temporary() bool</span><br><span class="line">			&#125;); ok &amp;&amp; ne.Temporary() &#123;</span><br><span class="line">				if tempDelay == 0 &#123;</span><br><span class="line">					tempDelay = 5 * time.Millisecond</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					tempDelay *= 2</span><br><span class="line">				&#125;</span><br><span class="line">				if max := 1 * time.Second; tempDelay &gt; max &#123;</span><br><span class="line">					tempDelay = max</span><br><span class="line">				&#125;</span><br><span class="line">				s.mu.Lock()</span><br><span class="line">				s.printf(&quot;Accept error: %v; retrying in %v&quot;, err, tempDelay)</span><br><span class="line">				s.mu.Unlock()</span><br><span class="line">				timer := time.NewTimer(tempDelay)</span><br><span class="line">				select &#123;</span><br><span class="line">				case &lt;-timer.C:</span><br><span class="line">				case &lt;-s.quit.Done():</span><br><span class="line">					timer.Stop()</span><br><span class="line">					return nil</span><br><span class="line">				&#125;</span><br><span class="line">				continue</span><br><span class="line">			&#125;</span><br><span class="line">			s.mu.Lock()</span><br><span class="line">			s.printf(&quot;done serving; Accept = %v&quot;, err)</span><br><span class="line">			s.mu.Unlock()</span><br><span class="line"></span><br><span class="line">			if s.quit.HasFired() &#123;</span><br><span class="line">				return nil</span><br><span class="line">			&#125;</span><br><span class="line">			return err</span><br><span class="line">		&#125;</span><br><span class="line">		tempDelay = 0</span><br><span class="line">		// Start a new goroutine to deal with rawConn so we don&apos;t stall this Accept</span><br><span class="line">		// loop goroutine.</span><br><span class="line">		//</span><br><span class="line">		// Make sure we account for the goroutine so GracefulStop doesn&apos;t nil out</span><br><span class="line">		// s.conns before this conn can be added.</span><br><span class="line">		s.serveWG.Add(1)</span><br><span class="line">		go func() &#123;</span><br><span class="line">			s.handleRawConn(rawConn)</span><br><span class="line">			s.serveWG.Done()</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从代码可以看出，每个请求进来，Server会起一个goroutine去处理这个请求，真正处理客户端请求的是 handleRawConn 方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">// handleRawConn forks a goroutine to handle a just-accepted connection that</span><br><span class="line">// has not had any I/O performed on it yet.</span><br><span class="line">func (s *Server) handleRawConn(rawConn net.Conn) &#123;</span><br><span class="line">	if s.quit.HasFired() &#123;</span><br><span class="line">		rawConn.Close()</span><br><span class="line">		return</span><br><span class="line">	&#125;</span><br><span class="line">	// 设置 read和 write的Deadline</span><br><span class="line">	rawConn.SetDeadline(time.Now().Add(s.opts.connectionTimeout))</span><br><span class="line">	//如果有配置TLS证书之类的，要进行TLS握手相关操作</span><br><span class="line">	conn, authInfo, err := s.useTransportAuthenticator(rawConn)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		// ErrConnDispatched means that the connection was dispatched away from</span><br><span class="line">		// gRPC; those connections should be left open.</span><br><span class="line">		if err != credentials.ErrConnDispatched &#123;</span><br><span class="line">			s.mu.Lock()</span><br><span class="line">			s.errorf(&quot;ServerHandshake(%q) failed: %v&quot;, rawConn.RemoteAddr(), err)</span><br><span class="line">			s.mu.Unlock()</span><br><span class="line">			channelz.Warningf(s.channelzID, &quot;grpc: Server.Serve failed to complete security handshake from %q: %v&quot;, rawConn.RemoteAddr(), err)</span><br><span class="line">			rawConn.Close()</span><br><span class="line">		&#125;</span><br><span class="line">		rawConn.SetDeadline(time.Time&#123;&#125;)</span><br><span class="line">		return</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    //完成HTTP2握手（处理http2连接的建立，http2连接的建立也需要客户端和服务端交换，即http2 Connection Preface）</span><br><span class="line">    //将客户端HTTP2请求连接转换为 http2协议类型的transport.ServerTransport,也就是http2Server</span><br><span class="line">	// Finish handshaking (HTTP2)</span><br><span class="line">	st := s.newHTTP2Transport(conn, authInfo)</span><br><span class="line">	if st == nil &#123;</span><br><span class="line">		return</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    //将链接的deadline置为空，因为这时握手已经完成了，而客户端并不是一直都在发送请求的</span><br><span class="line">	rawConn.SetDeadline(time.Time&#123;&#125;)</span><br><span class="line">	//将HTTP2连接添加进Server的HTTP2链接映射</span><br><span class="line">	if !s.addConn(st) &#123;</span><br><span class="line">		return</span><br><span class="line">	&#125;</span><br><span class="line">	go func() &#123;</span><br><span class="line">	    //等待rpc请求到来，处理请求</span><br><span class="line">		s.serveStreams(st)</span><br><span class="line">		//移除http2连接</span><br><span class="line">		s.removeConn(st)</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">// 每个http2连接在服务端会生成一个ServerTransport，这里是 htt2server</span><br><span class="line">// newHTTP2Transport sets up a http/2 transport (using the</span><br><span class="line">// gRPC http2 server transport in transport/http2_server.go).</span><br><span class="line">func (s *Server) newHTTP2Transport(c net.Conn, authInfo credentials.AuthInfo) transport.ServerTransport &#123;</span><br><span class="line">	config := &amp;transport.ServerConfig&#123;</span><br><span class="line">		MaxStreams:            s.opts.maxConcurrentStreams,</span><br><span class="line">		AuthInfo:              authInfo,</span><br><span class="line">		InTapHandle:           s.opts.inTapHandle,</span><br><span class="line">		StatsHandler:          s.opts.statsHandler,</span><br><span class="line">		KeepaliveParams:       s.opts.keepaliveParams,</span><br><span class="line">		KeepalivePolicy:       s.opts.keepalivePolicy,</span><br><span class="line">		InitialWindowSize:     s.opts.initialWindowSize,</span><br><span class="line">		InitialConnWindowSize: s.opts.initialConnWindowSize,</span><br><span class="line">		WriteBufferSize:       s.opts.writeBufferSize,</span><br><span class="line">		ReadBufferSize:        s.opts.readBufferSize,</span><br><span class="line">		ChannelzParentID:      s.channelzID,</span><br><span class="line">		MaxHeaderListSize:     s.opts.maxHeaderListSize,</span><br><span class="line">		HeaderTableSize:       s.opts.headerTableSize,</span><br><span class="line">	&#125;</span><br><span class="line">	//返回了实现了ServerTransport接口的http2Server</span><br><span class="line">	//ServerTransport接口规定了HandleStreams、WriteHeader 等方法</span><br><span class="line">	st, err := transport.NewServerTransport(&quot;http2&quot;, c, config)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		s.mu.Lock()</span><br><span class="line">		s.errorf(&quot;NewServerTransport(%q) failed: %v&quot;, c.RemoteAddr(), err)</span><br><span class="line">		s.mu.Unlock()</span><br><span class="line">		c.Close()</span><br><span class="line">		channelz.Warning(s.channelzID, &quot;grpc: Server.Serve failed to create ServerTransport: &quot;, err)</span><br><span class="line">		return nil</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	return st</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// NewServerTransport creates a ServerTransport with conn or non-nil error</span><br><span class="line">// if it fails.</span><br><span class="line">func NewServerTransport(protocol string, conn net.Conn, config *ServerConfig) (ServerTransport, error) &#123;</span><br><span class="line">	return newHTTP2Server(conn, config)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br></pre></td><td class="code"><pre><span class="line">// newHTTP2Server constructs a ServerTransport based on HTTP2. ConnectionError is</span><br><span class="line">// returned if something goes wrong.</span><br><span class="line">func newHTTP2Server(conn net.Conn, config *ServerConfig) (_ ServerTransport, err error) &#123;</span><br><span class="line">    //初始化一些读写缓冲长度的限制</span><br><span class="line">	writeBufSize := config.WriteBufferSize</span><br><span class="line">	readBufSize := config.ReadBufferSize</span><br><span class="line">	maxHeaderListSize := defaultServerMaxHeaderListSize</span><br><span class="line">	if config.MaxHeaderListSize != nil &#123;</span><br><span class="line">		maxHeaderListSize = *config.MaxHeaderListSize</span><br><span class="line">	&#125;</span><br><span class="line">	//封装帧的读取，底层用的是http2.frame</span><br><span class="line">	framer := newFramer(conn, writeBufSize, readBufSize, maxHeaderListSize)</span><br><span class="line">	// Send initial settings as connection preface to client.</span><br><span class="line">	//初始化配置帧（HTTP2连接前奏）</span><br><span class="line">	isettings := []http2.Setting&#123;&#123;</span><br><span class="line">		ID:  http2.SettingMaxFrameSize,</span><br><span class="line">		Val: http2MaxFrameLen,</span><br><span class="line">	&#125;&#125;</span><br><span class="line">	// TODO(zhaoq): Have a better way to signal &quot;no limit&quot; because 0 is</span><br><span class="line">	// permitted in the HTTP2 spec.</span><br><span class="line">	// 流的最大数量</span><br><span class="line">	maxStreams := config.MaxStreams</span><br><span class="line">	if maxStreams == 0 &#123;</span><br><span class="line">		maxStreams = math.MaxUint32</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		isettings = append(isettings, http2.Setting&#123;</span><br><span class="line">			ID:  http2.SettingMaxConcurrentStreams,</span><br><span class="line">			Val: maxStreams,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	dynamicWindow := true</span><br><span class="line">	iwz := int32(initialWindowSize)</span><br><span class="line">	if config.InitialWindowSize &gt;= defaultWindowSize &#123;</span><br><span class="line">		iwz = config.InitialWindowSize</span><br><span class="line">		dynamicWindow = false</span><br><span class="line">	&#125;</span><br><span class="line">	icwz := int32(initialWindowSize)</span><br><span class="line">	if config.InitialConnWindowSize &gt;= defaultWindowSize &#123;</span><br><span class="line">		icwz = config.InitialConnWindowSize</span><br><span class="line">		dynamicWindow = false</span><br><span class="line">	&#125;</span><br><span class="line">	if iwz != defaultWindowSize &#123;</span><br><span class="line">		isettings = append(isettings, http2.Setting&#123;</span><br><span class="line">			ID:  http2.SettingInitialWindowSize,</span><br><span class="line">			Val: uint32(iwz)&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	if config.MaxHeaderListSize != nil &#123;</span><br><span class="line">		isettings = append(isettings, http2.Setting&#123;</span><br><span class="line">			ID:  http2.SettingMaxHeaderListSize,</span><br><span class="line">			Val: *config.MaxHeaderListSize,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	if config.HeaderTableSize != nil &#123;</span><br><span class="line">		isettings = append(isettings, http2.Setting&#123;</span><br><span class="line">			ID:  http2.SettingHeaderTableSize,</span><br><span class="line">			Val: *config.HeaderTableSize,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	if err := framer.fr.WriteSettings(isettings...); err != nil &#123;</span><br><span class="line">		return nil, connectionErrorf(false, err, &quot;transport: %v&quot;, err)</span><br><span class="line">	&#125;</span><br><span class="line">	// Adjust the connection flow control window if needed.</span><br><span class="line">	if delta := uint32(icwz - defaultWindowSize); delta &gt; 0 &#123;</span><br><span class="line">		if err := framer.fr.WriteWindowUpdate(0, delta); err != nil &#123;</span><br><span class="line">			return nil, connectionErrorf(false, err, &quot;transport: %v&quot;, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	// tcp连接的KeepAlive相关参数</span><br><span class="line">	kp := config.KeepaliveParams</span><br><span class="line">	if kp.MaxConnectionIdle == 0 &#123;</span><br><span class="line">		kp.MaxConnectionIdle = defaultMaxConnectionIdle</span><br><span class="line">	&#125;</span><br><span class="line">	if kp.MaxConnectionAge == 0 &#123;</span><br><span class="line">		kp.MaxConnectionAge = defaultMaxConnectionAge</span><br><span class="line">	&#125;</span><br><span class="line">	// Add a jitter to MaxConnectionAge.</span><br><span class="line">	kp.MaxConnectionAge += getJitter(kp.MaxConnectionAge)</span><br><span class="line">	if kp.MaxConnectionAgeGrace == 0 &#123;</span><br><span class="line">		kp.MaxConnectionAgeGrace = defaultMaxConnectionAgeGrace</span><br><span class="line">	&#125;</span><br><span class="line">	// 最大idle时间，超过此客户端连接将被关闭，默认无穷</span><br><span class="line">	if kp.Time == 0 &#123;</span><br><span class="line">		kp.Time = defaultServerKeepaliveTime</span><br><span class="line">	&#125;</span><br><span class="line">	if kp.Timeout == 0 &#123;</span><br><span class="line">		kp.Timeout = defaultServerKeepaliveTimeout</span><br><span class="line">	&#125;</span><br><span class="line">	kep := config.KeepalivePolicy</span><br><span class="line">	if kep.MinTime == 0 &#123;</span><br><span class="line">		kep.MinTime = defaultKeepalivePolicyMinTime</span><br><span class="line">	&#125;</span><br><span class="line">	done := make(chan struct&#123;&#125;)</span><br><span class="line">	t := &amp;http2Server&#123;</span><br><span class="line">		ctx:               context.Background(),</span><br><span class="line">		done:              done,</span><br><span class="line">		conn:              conn,</span><br><span class="line">		remoteAddr:        conn.RemoteAddr(),</span><br><span class="line">		localAddr:         conn.LocalAddr(),</span><br><span class="line">		authInfo:          config.AuthInfo,</span><br><span class="line">		framer:            framer,</span><br><span class="line">		readerDone:        make(chan struct&#123;&#125;),</span><br><span class="line">		writerDone:        make(chan struct&#123;&#125;),</span><br><span class="line">		maxStreams:        maxStreams,</span><br><span class="line">		inTapHandle:       config.InTapHandle,</span><br><span class="line">		fc:                &amp;trInFlow&#123;limit: uint32(icwz)&#125;,</span><br><span class="line">		state:             reachable,</span><br><span class="line">		activeStreams:     make(map[uint32]*Stream),</span><br><span class="line">		stats:             config.StatsHandler,</span><br><span class="line">		kp:                kp,</span><br><span class="line">		idle:              time.Now(),</span><br><span class="line">		kep:               kep,</span><br><span class="line">		initialWindowSize: iwz,</span><br><span class="line">		czData:            new(channelzData),</span><br><span class="line">		bufferPool:        newBufferPool(),</span><br><span class="line">	&#125;</span><br><span class="line">	t.controlBuf = newControlBuffer(t.done)</span><br><span class="line">	if dynamicWindow &#123;</span><br><span class="line">		t.bdpEst = &amp;bdpEstimator&#123;</span><br><span class="line">			bdp:               initialWindowSize,</span><br><span class="line">			updateFlowControl: t.updateFlowControl,</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	if t.stats != nil &#123;</span><br><span class="line">		t.ctx = t.stats.TagConn(t.ctx, &amp;stats.ConnTagInfo&#123;</span><br><span class="line">			RemoteAddr: t.remoteAddr,</span><br><span class="line">			LocalAddr:  t.localAddr,</span><br><span class="line">		&#125;)</span><br><span class="line">		connBegin := &amp;stats.ConnBegin&#123;&#125;</span><br><span class="line">		t.stats.HandleConn(t.ctx, connBegin)</span><br><span class="line">	&#125;</span><br><span class="line">	if channelz.IsOn() &#123;</span><br><span class="line">		t.channelzID = channelz.RegisterNormalSocket(t, config.ChannelzParentID, fmt.Sprintf(&quot;%s -&gt; %s&quot;, t.remoteAddr, t.localAddr))</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	t.connectionID = atomic.AddUint64(&amp;serverConnectionCounter, 1)</span><br><span class="line"></span><br><span class="line">	t.framer.writer.Flush()</span><br><span class="line"></span><br><span class="line">	defer func() &#123;</span><br><span class="line">		if err != nil &#123;</span><br><span class="line">			t.Close()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">    // 校验客户端http2建立前奏的perface是否有效</span><br><span class="line">	// Check the validity of client preface.</span><br><span class="line">	preface := make([]byte, len(clientPreface))</span><br><span class="line">	if _, err := io.ReadFull(t.conn, preface); err != nil &#123;</span><br><span class="line">		return nil, connectionErrorf(false, err, &quot;transport: http2Server.HandleStreams failed to receive the preface from client: %v&quot;, err)</span><br><span class="line">	&#125;</span><br><span class="line">	if !bytes.Equal(preface, clientPreface) &#123;</span><br><span class="line">		return nil, connectionErrorf(false, nil, &quot;transport: http2Server.HandleStreams received bogus greeting from client: %q&quot;, preface)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	frame, err := t.framer.fr.ReadFrame()</span><br><span class="line">	if err == io.EOF || err == io.ErrUnexpectedEOF &#123;</span><br><span class="line">		return nil, err</span><br><span class="line">	&#125;</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		return nil, connectionErrorf(false, err, &quot;transport: http2Server.HandleStreams failed to read initial settings frame: %v&quot;, err)</span><br><span class="line">	&#125;</span><br><span class="line">	atomic.StoreInt64(&amp;t.lastRead, time.Now().UnixNano())</span><br><span class="line">	sf, ok := frame.(*http2.SettingsFrame)</span><br><span class="line">	if !ok &#123;</span><br><span class="line">		return nil, connectionErrorf(false, nil, &quot;transport: http2Server.HandleStreams saw invalid preface type %T from client&quot;, frame)</span><br><span class="line">	&#125;</span><br><span class="line">	t.handleSettings(sf)</span><br><span class="line"></span><br><span class="line">	go func() &#123;</span><br><span class="line">		t.loopy = newLoopyWriter(serverSide, t.framer, t.controlBuf, t.bdpEst)</span><br><span class="line">		t.loopy.ssGoAwayHandler = t.outgoingGoAwayHandler</span><br><span class="line">		if err := t.loopy.run(); err != nil &#123;</span><br><span class="line">			errorf(&quot;transport: loopyWriter.run returning. Err: %v&quot;, err)</span><br><span class="line">		&#125;</span><br><span class="line">		t.conn.Close()</span><br><span class="line">		close(t.writerDone)</span><br><span class="line">	&#125;()</span><br><span class="line">	//起一个goroutine专门处理tcp保活</span><br><span class="line">	go t.keepalive()</span><br><span class="line">	return t, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一个HTTP2请求进来，先HTT2协议握手建立HTT2连接（处理建立连接过程中的帧数据），然后一直循环处理新的流的建立（新的HTTP2请求到来）和数据帧的收发（基于HTTP2的多路复用，客户端可以使用同一条链接同时发送多个请求）。HTTP2链接在代码层面为ServerTransport，也就是http2Server</p>
+<p>接下来我们看下serveStreams方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">func (s *Server) serveStreams(st transport.ServerTransport) &#123;</span><br><span class="line">	defer st.Close()</span><br><span class="line">	var wg sync.WaitGroup</span><br><span class="line">	st.HandleStreams(func(stream *transport.Stream) &#123;</span><br><span class="line">		wg.Add(1)</span><br><span class="line">		//回调中开启子goroutine，处理rpc请求</span><br><span class="line">		go func() &#123;</span><br><span class="line">			defer wg.Done()</span><br><span class="line">			//grpc基于http2，一个rpc请求使用一个stream，一个连接可能有多个rpc请求，也就存在多个请求stream过来</span><br><span class="line">			//当有新的rpc请求进来，就会进入此回调，然后调用server的handleStream方法处理rpc请求</span><br><span class="line">			s.handleStream(st, stream, s.traceInfo(st, stream))</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;, func(ctx context.Context, method string) context.Context &#123;</span><br><span class="line">		if !EnableTracing &#123;</span><br><span class="line">			return ctx</span><br><span class="line">		&#125;</span><br><span class="line">		tr := trace.New(&quot;grpc.Recv.&quot;+methodFamily(method), method)</span><br><span class="line">		return trace.NewContext(ctx, tr)</span><br><span class="line">	&#125;)</span><br><span class="line">	wg.Wait()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，这里是使用waitGroup进行阻塞等待，不断处理同一个http2连接的请求。</p>
+<p>HandleStreams使用注册的Handler处理请求streams<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HandleStreams(func(*Stream), func(context.Context, string) context.Context)</span><br></pre></td></tr></table></figure></p>
+<p>这是一个接口方法，这里的具体实现是http2Server的HandleStreams方法，传入一个处理stream的handler处理函数，一个trace处理函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">func (t *http2Server) HandleStreams(handle func(*Stream), traceCtx func(context.Context, string) context.Context) &#123;</span><br><span class="line">	defer close(t.readerDone)</span><br><span class="line">	for &#123;</span><br><span class="line">		t.controlBuf.throttle()</span><br><span class="line">		frame, err := t.framer.fr.ReadFrame()</span><br><span class="line">		atomic.StoreInt64(&amp;t.lastRead, time.Now().UnixNano())</span><br><span class="line">		if err != nil &#123;</span><br><span class="line">			if se, ok := err.(http2.StreamError); ok &#123;</span><br><span class="line">				warningf(&quot;transport: http2Server.HandleStreams encountered http2.StreamError: %v&quot;, se)</span><br><span class="line">				t.mu.Lock()</span><br><span class="line">				s := t.activeStreams[se.StreamID]</span><br><span class="line">				t.mu.Unlock()</span><br><span class="line">				if s != nil &#123;</span><br><span class="line">					t.closeStream(s, true, se.Code, false)</span><br><span class="line">				&#125; else &#123;</span><br><span class="line">					t.controlBuf.put(&amp;cleanupStream&#123;</span><br><span class="line">						streamID: se.StreamID,</span><br><span class="line">						rst:      true,</span><br><span class="line">						rstCode:  se.Code,</span><br><span class="line">						onWrite:  func() &#123;&#125;,</span><br><span class="line">					&#125;)</span><br><span class="line">				&#125;</span><br><span class="line">				continue</span><br><span class="line">			&#125;</span><br><span class="line">			if err == io.EOF || err == io.ErrUnexpectedEOF &#123;</span><br><span class="line">				t.Close()</span><br><span class="line">				return</span><br><span class="line">			&#125;</span><br><span class="line">			warningf(&quot;transport: http2Server.HandleStreams failed to read frame: %v&quot;, err)</span><br><span class="line">			t.Close()</span><br><span class="line">			return</span><br><span class="line">		&#125;</span><br><span class="line">		switch frame := frame.(type) &#123;</span><br><span class="line">		case *http2.MetaHeadersFrame:</span><br><span class="line">			if t.operateHeaders(frame, handle, traceCtx) &#123;</span><br><span class="line">				t.Close()</span><br><span class="line">				break</span><br><span class="line">			&#125;</span><br><span class="line">		case *http2.DataFrame:</span><br><span class="line">			t.handleData(frame)</span><br><span class="line">		case *http2.RSTStreamFrame:</span><br><span class="line">			t.handleRSTStream(frame)</span><br><span class="line">		case *http2.SettingsFrame:</span><br><span class="line">			t.handleSettings(frame)</span><br><span class="line">		case *http2.PingFrame:</span><br><span class="line">			t.handlePing(frame)</span><br><span class="line">		case *http2.WindowUpdateFrame:</span><br><span class="line">			t.handleWindowUpdate(frame)</span><br><span class="line">		case *http2.GoAwayFrame:</span><br><span class="line">			// TODO: Handle GoAway from the client appropriately.</span><br><span class="line">		default:</span><br><span class="line">			errorf(&quot;transport: http2Server.HandleStreams found unhandled frame type %v.&quot;, frame)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看出该方法循环读取客户端连接发送过来的帧，如果是HEADER帧，说明有新的rpc请求进来，回调handler;如果是DATA帧，将数据分发到stream;如果是RST帧…</p>
+<p>接着我们来看下server的handleStream方法，该方法处理新的rpc请求<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">func (s *Server) handleStream(t transport.ServerTransport, stream *transport.Stream, trInfo *traceInfo) &#123;</span><br><span class="line">    //下面的这段代码主要是分割字符串取出service服务名与相应的方法名</span><br><span class="line">	sm := stream.Method()</span><br><span class="line">	//去除开头的&apos;/&apos;</span><br><span class="line">	if sm != &quot;&quot; &amp;&amp; sm[0] == &apos;/&apos; &#123;</span><br><span class="line">		sm = sm[1:]</span><br><span class="line">	&#125;</span><br><span class="line">	pos := strings.LastIndex(sm, &quot;/&quot;)</span><br><span class="line">	if pos == -1 &#123;</span><br><span class="line">		if trInfo != nil &#123;</span><br><span class="line">			trInfo.tr.LazyLog(&amp;fmtStringer&#123;&quot;Malformed method name %q&quot;, []interface&#123;&#125;&#123;sm&#125;&#125;, true)</span><br><span class="line">			trInfo.tr.SetError()</span><br><span class="line">		&#125;</span><br><span class="line">		errDesc := fmt.Sprintf(&quot;malformed method name: %q&quot;, stream.Method())</span><br><span class="line">		if err := t.WriteStatus(stream, status.New(codes.ResourceExhausted, errDesc)); err != nil &#123;</span><br><span class="line">			if trInfo != nil &#123;</span><br><span class="line">				trInfo.tr.LazyLog(&amp;fmtStringer&#123;&quot;%v&quot;, []interface&#123;&#125;&#123;err&#125;&#125;, true)</span><br><span class="line">				trInfo.tr.SetError()</span><br><span class="line">			&#125;</span><br><span class="line">			channelz.Warningf(s.channelzID, &quot;grpc: Server.handleStream failed to write status: %v&quot;, err)</span><br><span class="line">		&#125;</span><br><span class="line">		if trInfo != nil &#123;</span><br><span class="line">			trInfo.tr.Finish()</span><br><span class="line">		&#125;</span><br><span class="line">		return</span><br><span class="line">	&#125;</span><br><span class="line">	service := sm[:pos]</span><br><span class="line">	method := sm[pos+1:]</span><br><span class="line"></span><br><span class="line">    //在server的service映射中根据service名查找对应的service服务</span><br><span class="line">	srv, knownService := s.m[service]</span><br><span class="line">	if knownService &#123;//如果有找到</span><br><span class="line">	    //在普通的rpc方法映射中查找对应的方法描述</span><br><span class="line">		if md, ok := srv.md[method]; ok &#123;</span><br><span class="line">			s.processUnaryRPC(t, stream, srv, md, trInfo)</span><br><span class="line">			return</span><br><span class="line">		&#125;</span><br><span class="line">		//在流式rpc方法映射中查找对应的流描述</span><br><span class="line">		if sd, ok := srv.sd[method]; ok &#123;</span><br><span class="line">			s.processStreamingRPC(t, stream, srv, sd, trInfo)</span><br><span class="line">			return</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	//如果请求的service服务或者方法不存在，且server的配置中有配置处理位置服务的方法，则交由这个方法处理</span><br><span class="line">	// Unknown service, or known server unknown method.</span><br><span class="line">	if unknownDesc := s.opts.unknownStreamDesc; unknownDesc != nil &#123;</span><br><span class="line">		s.processStreamingRPC(t, stream, nil, unknownDesc, trInfo)</span><br><span class="line">		return</span><br><span class="line">	&#125;</span><br><span class="line">	var errDesc string</span><br><span class="line">	if !knownService &#123;</span><br><span class="line">		errDesc = fmt.Sprintf(&quot;unknown service %v&quot;, service)</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		errDesc = fmt.Sprintf(&quot;unknown method %v for service %v&quot;, method, service)</span><br><span class="line">	&#125;</span><br><span class="line">	if trInfo != nil &#123;</span><br><span class="line">		trInfo.tr.LazyPrintf(&quot;%s&quot;, errDesc)</span><br><span class="line">		trInfo.tr.SetError()</span><br><span class="line">	&#125;</span><br><span class="line">	if err := t.WriteStatus(stream, status.New(codes.Unimplemented, errDesc)); err != nil &#123;</span><br><span class="line">		if trInfo != nil &#123;</span><br><span class="line">			trInfo.tr.LazyLog(&amp;fmtStringer&#123;&quot;%v&quot;, []interface&#123;&#125;&#123;err&#125;&#125;, true)</span><br><span class="line">			trInfo.tr.SetError()</span><br><span class="line">		&#125;</span><br><span class="line">		channelz.Warningf(s.channelzID, &quot;grpc: Server.handleStream failed to write status: %v&quot;, err)</span><br><span class="line">	&#125;</span><br><span class="line">	if trInfo != nil &#123;</span><br><span class="line">		trInfo.tr.Finish()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接下来我们看下普通一元rpc请求的processUnaryRPC（去除掉一些与主要流程没有太大关系的非核心代码，流式rpc处理方法就不贴出来的，思路是差不多的）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br></pre></td><td class="code"><pre><span class="line">func (s *Server) processUnaryRPC(t transport.ServerTransport, stream *transport.Stream, srv *service, md *MethodDesc, trInfo *traceInfo) (err error) &#123;</span><br><span class="line">	// ...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    //设置压缩解压缩的配置</span><br><span class="line">	// comp and cp are used for compression.  decomp and dc are used for</span><br><span class="line">	// decompression.  If comp and decomp are both set, they are the same;</span><br><span class="line">	// however they are kept separate to ensure that at most one of the</span><br><span class="line">	// compressor/decompressor variable pairs are set for use later.</span><br><span class="line">	var comp, decomp encoding.Compressor</span><br><span class="line">	var cp Compressor</span><br><span class="line">	var dc Decompressor</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	// If dc is set and matches the stream&apos;s compression, use it.  Otherwise, try</span><br><span class="line">	// to find a matching registered compressor for decomp.</span><br><span class="line">	if rc := stream.RecvCompress(); s.opts.dc != nil &amp;&amp; s.opts.dc.Type() == rc &#123;</span><br><span class="line">		dc = s.opts.dc</span><br><span class="line">	&#125; else if rc != &quot;&quot; &amp;&amp; rc != encoding.Identity &#123;</span><br><span class="line">		decomp = encoding.GetCompressor(rc)</span><br><span class="line">		if decomp == nil &#123;</span><br><span class="line">			st := status.Newf(codes.Unimplemented, &quot;grpc: Decompressor is not installed for grpc-encoding %q&quot;, rc)</span><br><span class="line">			t.WriteStatus(stream, st)</span><br><span class="line">			return st.Err()</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	// If cp is set, use it.  Otherwise, attempt to compress the response using</span><br><span class="line">	// the incoming message compression method.</span><br><span class="line">	//</span><br><span class="line">	// NOTE: this needs to be ahead of all handling, https://github.com/grpc/grpc-go/issues/686.</span><br><span class="line">	if s.opts.cp != nil &#123;</span><br><span class="line">		cp = s.opts.cp</span><br><span class="line">		stream.SetSendCompress(cp.Type())</span><br><span class="line">	&#125; else if rc := stream.RecvCompress(); rc != &quot;&quot; &amp;&amp; rc != encoding.Identity &#123;</span><br><span class="line">		// Legacy compressor not specified; attempt to respond with same encoding.</span><br><span class="line">		comp = encoding.GetCompressor(rc)</span><br><span class="line">		if comp != nil &#123;</span><br><span class="line">			stream.SetSendCompress(rc)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	var payInfo *payloadInfo</span><br><span class="line">	if sh != nil || binlog != nil &#123;</span><br><span class="line">		payInfo = &amp;payloadInfo&#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	//接收数据并解压缩</span><br><span class="line">	d, err := recvAndDecompress(&amp;parser&#123;r: stream&#125;, stream, dc, s.opts.maxReceiveMessageSize, payInfo, decomp)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		if st, ok := status.FromError(err); ok &#123;</span><br><span class="line">			if e := t.WriteStatus(stream, st); e != nil &#123;</span><br><span class="line">				channelz.Warningf(s.channelzID, &quot;grpc: Server.processUnaryRPC failed to write status %v&quot;, e)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line">	if channelz.IsOn() &#123;</span><br><span class="line">		t.IncrMsgRecv()</span><br><span class="line">	&#125;</span><br><span class="line">	// 反序列化，最终数据放到v中，而这个v则指向服务接口实现对应方法的请求参数req</span><br><span class="line">	df := func(v interface&#123;&#125;) error &#123;</span><br><span class="line">	//反序列化请求参数</span><br><span class="line">		if err := s.getCodec(stream.ContentSubtype()).Unmarshal(d, v); err != nil &#123;</span><br><span class="line">			return status.Errorf(codes.Internal, &quot;grpc: error unmarshalling request: %v&quot;, err)</span><br><span class="line">		&#125;</span><br><span class="line">		if sh != nil &#123;</span><br><span class="line">			sh.HandleRPC(stream.Context(), &amp;stats.InPayload&#123;</span><br><span class="line">				RecvTime:   time.Now(),</span><br><span class="line">				Payload:    v,</span><br><span class="line">				WireLength: payInfo.wireLength,</span><br><span class="line">				Data:       d,</span><br><span class="line">				Length:     len(d),</span><br><span class="line">			&#125;)</span><br><span class="line">		&#125;</span><br><span class="line">        //...</span><br><span class="line">		return nil</span><br><span class="line">	&#125;</span><br><span class="line">	ctx := NewContextWithServerTransportStream(stream.Context(), stream)</span><br><span class="line">	//调用Handler,这个Handler方法是proto自动编码工具生成的。其内部会去调用service服务的对应方法。df是反序列化方法，最后一个是创建grpc.Server指定的拦截器</span><br><span class="line">	reply, appErr := md.Handler(srv.server, ctx, df, s.opts.unaryInt)</span><br><span class="line">	if appErr != nil &#123;</span><br><span class="line">		appStatus, ok := status.FromError(appErr)</span><br><span class="line">		if !ok &#123;</span><br><span class="line">			// Convert appErr if it is not a grpc status error.</span><br><span class="line">			appErr = status.Error(codes.Unknown, appErr.Error())</span><br><span class="line">			appStatus, _ = status.FromError(appErr)</span><br><span class="line">		&#125;</span><br><span class="line">		if trInfo != nil &#123;</span><br><span class="line">			trInfo.tr.LazyLog(stringer(appStatus.Message()), true)</span><br><span class="line">			trInfo.tr.SetError()</span><br><span class="line">		&#125;</span><br><span class="line">		// 写入错误信息到stream中</span><br><span class="line">		if e := t.WriteStatus(stream, appStatus); e != nil &#123;</span><br><span class="line">			channelz.Warningf(s.channelzID, &quot;grpc: Server.processUnaryRPC failed to write status: %v&quot;, e)</span><br><span class="line">		&#125;</span><br><span class="line">        //...</span><br><span class="line">		&#125;</span><br><span class="line">		return appErr</span><br><span class="line">	&#125;</span><br><span class="line">	if trInfo != nil &#123;</span><br><span class="line">		trInfo.tr.LazyLog(stringer(&quot;OK&quot;), false)</span><br><span class="line">	&#125;</span><br><span class="line">	opts := &amp;transport.Options&#123;Last: true&#125;</span><br><span class="line"></span><br><span class="line">// 序列化reply给客户端</span><br><span class="line">	if err := s.sendResponse(t, stream, reply, cp, opts, comp); err != nil &#123;</span><br><span class="line">		if err == io.EOF &#123;</span><br><span class="line">			// The entire stream is done (for unary RPC only).</span><br><span class="line">			return err</span><br><span class="line">		&#125;</span><br><span class="line">		if sts, ok := status.FromError(err); ok &#123;</span><br><span class="line">			if e := t.WriteStatus(stream, sts); e != nil &#123;</span><br><span class="line">				channelz.Warningf(s.channelzID, &quot;grpc: Server.processUnaryRPC failed to write status: %v&quot;, e)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; else &#123;</span><br><span class="line">			switch st := err.(type) &#123;</span><br><span class="line">			case transport.ConnectionError:</span><br><span class="line">				// Nothing to do here.</span><br><span class="line">			default:</span><br><span class="line">				panic(fmt.Sprintf(&quot;grpc: Unexpected error (%T) from sendResponse: %v&quot;, st, st))</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		if binlog != nil &#123;</span><br><span class="line">			h, _ := stream.Header()</span><br><span class="line">			binlog.Log(&amp;binarylog.ServerHeader&#123;</span><br><span class="line">				Header: h,</span><br><span class="line">			&#125;)</span><br><span class="line">			binlog.Log(&amp;binarylog.ServerTrailer&#123;</span><br><span class="line">				Trailer: stream.Trailer(),</span><br><span class="line">				Err:     appErr,</span><br><span class="line">			&#125;)</span><br><span class="line">		&#125;</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	err = t.WriteStatus(stream, statusOK)</span><br><span class="line"></span><br><span class="line">	return err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面这段代码的主要逻辑就是从stream中读取req请求，反序列化后调用methodDesc中的handler方法，处理完请求后将响应序列化然后写入stream返回给客户端。</p>
+<p>我们看一下消息解析的方法，这个方法是从buf中解析原始的数据转为protobuf序列化后的数据格式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">func recvAndDecompress(p *parser, s *transport.Stream, dc Decompressor, maxReceiveMessageSize int, payInfo *payloadInfo, compressor encoding.Compressor) ([]byte, error) &#123;</span><br><span class="line">// recvMsg解析出真正的消息（头5个字节：第一个字节代表是否压缩，2-5个字节消息体的长度，后面的数据全部读取给req）</span><br><span class="line">	pf, d, err := p.recvMsg(maxReceiveMessageSize)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		return nil, err</span><br><span class="line">	&#125;</span><br><span class="line">	if payInfo != nil &#123;</span><br><span class="line">		payInfo.wireLength = len(d)</span><br><span class="line">	&#125;</span><br><span class="line">// 检查压缩类型是否正确</span><br><span class="line">	if st := checkRecvPayload(pf, s.RecvCompress(), compressor != nil || dc != nil); st != nil &#123;</span><br><span class="line">		return nil, st.Err()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	var size int</span><br><span class="line">	if pf == compressionMade &#123;</span><br><span class="line">		// To match legacy behavior, if the decompressor is set by WithDecompressor or RPCDecompressor,</span><br><span class="line">		// use this decompressor as the default.</span><br><span class="line">		if dc != nil &#123;</span><br><span class="line">			d, err = dc.Do(bytes.NewReader(d))</span><br><span class="line">			size = len(d)</span><br><span class="line">		&#125; else &#123;</span><br><span class="line">			d, size, err = decompress(compressor, d, maxReceiveMessageSize)</span><br><span class="line">		&#125;</span><br><span class="line">		if err != nil &#123;</span><br><span class="line">			return nil, status.Errorf(codes.Internal, &quot;grpc: failed to decompress the received message %v&quot;, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		size = len(d)</span><br><span class="line">	&#125;</span><br><span class="line">	if size &gt; maxReceiveMessageSize &#123;</span><br><span class="line">		// TODO: Revisit the error code. Currently keep it consistent with java</span><br><span class="line">		// implementation.</span><br><span class="line">		return nil, status.Errorf(codes.ResourceExhausted, &quot;grpc: received message larger than max (%d vs. %d)&quot;, size, maxReceiveMessageSize)</span><br><span class="line">	&#125;</span><br><span class="line">	return d, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们再来看下上面提到的proto代码工具自动生成的handler方法（以HelloTiger为例）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">func _TigerService_HelloTiger_Handler(srv interface&#123;&#125;, ctx context.Context, dec func(interface&#123;&#125;) error, interceptor grpc.UnaryServerInterceptor) (interface&#123;&#125;, error) &#123;</span><br><span class="line">	in := new(HelloRequest)</span><br><span class="line">	//dec是传入的反序列化方法</span><br><span class="line">	if err := dec(in); err != nil &#123;</span><br><span class="line">		return nil, err</span><br><span class="line">	&#125;</span><br><span class="line">	//如果拦截器没设置，那么直接调用相应的方法</span><br><span class="line">	if interceptor == nil &#123;</span><br><span class="line">		return srv.(TigerServiceServer).HelloTiger(ctx, in)</span><br><span class="line">	&#125;</span><br><span class="line">	//servcie服务信息</span><br><span class="line">	info := &amp;grpc.UnaryServerInfo&#123;</span><br><span class="line">		Server:     srv,</span><br><span class="line">		FullMethod: &quot;/server_hello_proto.TigerService/HelloTiger&quot;,</span><br><span class="line">	&#125;</span><br><span class="line">	//回调</span><br><span class="line">	handler := func(ctx context.Context, req interface&#123;&#125;) (interface&#123;&#125;, error) &#123;</span><br><span class="line">		return srv.(TigerServiceServer).HelloTiger(ctx, req.(*HelloRequest))</span><br><span class="line">	&#125;</span><br><span class="line">	//有拦截器，先调用拦截器方法，传入回调函数</span><br><span class="line">	return interceptor(ctx, in, info, handler)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们再来看下中的NewContextWithServerTransportStream函数。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">//该函数基于现有ctx生成新的context，并将stream保存到上面</span><br><span class="line">// NewContextWithServerTransportStream creates a new context from ctx and</span><br><span class="line">// attaches stream to it.</span><br><span class="line">//</span><br><span class="line">// This API is EXPERIMENTAL.</span><br><span class="line">func NewContextWithServerTransportStream(ctx context.Context, stream ServerTransportStream) context.Context &#123;</span><br><span class="line">	return context.WithValue(ctx, streamKey&#123;&#125;, stream)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//该接口用于服务端设置传递给客户端的header</span><br><span class="line">// ServerTransportStream is a minimal interface that a transport stream must</span><br><span class="line">// implement. This can be used to mock an actual transport stream for tests of</span><br><span class="line">// handler code that use, for example, grpc.SetHeader (which requires some</span><br><span class="line">// stream to be in context).</span><br><span class="line">//</span><br><span class="line">// See also NewContextWithServerTransportStream.</span><br><span class="line">//</span><br><span class="line">// This API is EXPERIMENTAL.</span><br><span class="line">type ServerTransportStream interface &#123;</span><br><span class="line">	Method() string</span><br><span class="line">	SetHeader(md metadata.MD) error</span><br><span class="line">	SendHeader(md metadata.MD) error</span><br><span class="line">	SetTrailer(md metadata.MD) error</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们从代码中可以看出，调用NewContextWithServerTransportStream函数时传入的是当前请求的stream.context()</p>
+<p>我们再来看下 stream.ctx的生成<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br></pre></td><td class="code"><pre><span class="line">// operateHeader takes action on the decoded headers.</span><br><span class="line">func (t *http2Server) operateHeaders(frame *http2.MetaHeadersFrame, handle func(*Stream), traceCtx func(context.Context, string) context.Context) (fatal bool) &#123;</span><br><span class="line">	streamID := frame.Header().StreamID</span><br><span class="line">	state := &amp;decodeState&#123;</span><br><span class="line">		serverSide: true,</span><br><span class="line">	&#125;</span><br><span class="line">	//解析HEADER帧，获取HEADER帧中的各个字段</span><br><span class="line">	if err := state.decodeHeader(frame); err != nil &#123;</span><br><span class="line">		if se, ok := status.FromError(err); ok &#123;</span><br><span class="line">			t.controlBuf.put(&amp;cleanupStream&#123;</span><br><span class="line">				streamID: streamID,</span><br><span class="line">				rst:      true,</span><br><span class="line">				rstCode:  statusCodeConvTab[se.Code()],</span><br><span class="line">				onWrite:  func() &#123;&#125;,</span><br><span class="line">			&#125;)</span><br><span class="line">		&#125;</span><br><span class="line">		return false</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	buf := newRecvBuffer()</span><br><span class="line">	s := &amp;Stream&#123;</span><br><span class="line">		id:             streamID,</span><br><span class="line">		st:             t,</span><br><span class="line">		buf:            buf,</span><br><span class="line">		fc:             &amp;inFlow&#123;limit: uint32(t.initialWindowSize)&#125;,</span><br><span class="line">		recvCompress:   state.data.encoding,</span><br><span class="line">		method:         state.data.method,</span><br><span class="line">		contentSubtype: state.data.contentSubtype,</span><br><span class="line">	&#125;</span><br><span class="line">	if frame.StreamEnded() &#123;</span><br><span class="line">		// s is just created by the caller. No lock needed.</span><br><span class="line">		s.state = streamReadDone</span><br><span class="line">	&#125;</span><br><span class="line">	if state.data.timeoutSet &#123;</span><br><span class="line">		s.ctx, s.cancel = context.WithTimeout(t.ctx, state.data.timeout)</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		s.ctx, s.cancel = context.WithCancel(t.ctx)</span><br><span class="line">	&#125;</span><br><span class="line">	pr := &amp;peer.Peer&#123;</span><br><span class="line">		Addr: t.remoteAddr,</span><br><span class="line">	&#125;</span><br><span class="line">	// Attach Auth info if there is any.</span><br><span class="line">	if t.authInfo != nil &#123;</span><br><span class="line">		pr.AuthInfo = t.authInfo</span><br><span class="line">	&#125;</span><br><span class="line">	s.ctx = peer.NewContext(s.ctx, pr)</span><br><span class="line">	// Attach the received metadata to the context.</span><br><span class="line">	if len(state.data.mdata) &gt; 0 &#123;</span><br><span class="line">	 // 这里会将state.mdata保存到新的context中</span><br><span class="line">		s.ctx = metadata.NewIncomingContext(s.ctx, state.data.mdata)</span><br><span class="line">	&#125;</span><br><span class="line">	if state.data.statsTags != nil &#123;</span><br><span class="line">		s.ctx = stats.SetIncomingTags(s.ctx, state.data.statsTags)</span><br><span class="line">	&#125;</span><br><span class="line">	if state.data.statsTrace != nil &#123;</span><br><span class="line">		s.ctx = stats.SetIncomingTrace(s.ctx, state.data.statsTrace)</span><br><span class="line">	&#125;</span><br><span class="line">	if t.inTapHandle != nil &#123;</span><br><span class="line">		var err error</span><br><span class="line">		info := &amp;tap.Info&#123;</span><br><span class="line">			FullMethodName: state.data.method,</span><br><span class="line">		&#125;</span><br><span class="line">		s.ctx, err = t.inTapHandle(s.ctx, info)</span><br><span class="line">		if err != nil &#123;</span><br><span class="line">			warningf(&quot;transport: http2Server.operateHeaders got an error from InTapHandle: %v&quot;, err)</span><br><span class="line">			t.controlBuf.put(&amp;cleanupStream&#123;</span><br><span class="line">				streamID: s.id,</span><br><span class="line">				rst:      true,</span><br><span class="line">				rstCode:  http2.ErrCodeRefusedStream,</span><br><span class="line">				onWrite:  func() &#123;&#125;,</span><br><span class="line">			&#125;)</span><br><span class="line">			s.cancel()</span><br><span class="line">			return false</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	t.mu.Lock()</span><br><span class="line">	if t.state != reachable &#123;</span><br><span class="line">		t.mu.Unlock()</span><br><span class="line">		s.cancel()</span><br><span class="line">		return false</span><br><span class="line">	&#125;</span><br><span class="line">	if uint32(len(t.activeStreams)) &gt;= t.maxStreams &#123;</span><br><span class="line">		t.mu.Unlock()</span><br><span class="line">		t.controlBuf.put(&amp;cleanupStream&#123;</span><br><span class="line">			streamID: streamID,</span><br><span class="line">			rst:      true,</span><br><span class="line">			rstCode:  http2.ErrCodeRefusedStream,</span><br><span class="line">			onWrite:  func() &#123;&#125;,</span><br><span class="line">		&#125;)</span><br><span class="line">		s.cancel()</span><br><span class="line">		return false</span><br><span class="line">	&#125;</span><br><span class="line">	if streamID%2 != 1 || streamID &lt;= t.maxStreamID &#123;</span><br><span class="line">		t.mu.Unlock()</span><br><span class="line">		// illegal gRPC stream id.</span><br><span class="line">		errorf(&quot;transport: http2Server.HandleStreams received an illegal stream id: %v&quot;, streamID)</span><br><span class="line">		s.cancel()</span><br><span class="line">		return true</span><br><span class="line">	&#125;</span><br><span class="line">	t.maxStreamID = streamID</span><br><span class="line">	t.activeStreams[streamID] = s</span><br><span class="line">	if len(t.activeStreams) == 1 &#123;</span><br><span class="line">		t.idle = time.Time&#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	t.mu.Unlock()</span><br><span class="line">	if channelz.IsOn() &#123;</span><br><span class="line">		atomic.AddInt64(&amp;t.czData.streamsStarted, 1)</span><br><span class="line">		atomic.StoreInt64(&amp;t.czData.lastStreamCreatedTime, time.Now().UnixNano())</span><br><span class="line">	&#125;</span><br><span class="line">	s.requestRead = func(n int) &#123;</span><br><span class="line">		t.adjustWindow(s, uint32(n))</span><br><span class="line">	&#125;</span><br><span class="line">	s.ctx = traceCtx(s.ctx, s.method)</span><br><span class="line">	if t.stats != nil &#123;</span><br><span class="line">		s.ctx = t.stats.TagRPC(s.ctx, &amp;stats.RPCTagInfo&#123;FullMethodName: s.method&#125;)</span><br><span class="line">		inHeader := &amp;stats.InHeader&#123;</span><br><span class="line">			FullMethod:  s.method,</span><br><span class="line">			RemoteAddr:  t.remoteAddr,</span><br><span class="line">			LocalAddr:   t.localAddr,</span><br><span class="line">			Compression: s.recvCompress,</span><br><span class="line">			WireLength:  int(frame.Header().Length),</span><br><span class="line">			Header:      metadata.MD(state.data.mdata).Copy(),</span><br><span class="line">		&#125;</span><br><span class="line">		t.stats.HandleRPC(s.ctx, inHeader)</span><br><span class="line">	&#125;</span><br><span class="line">	s.ctxDone = s.ctx.Done()</span><br><span class="line">	s.wq = newWriteQuota(defaultWriteQuota, s.ctxDone)</span><br><span class="line">	s.trReader = &amp;transportReader&#123;</span><br><span class="line">		reader: &amp;recvBufferReader&#123;</span><br><span class="line">			ctx:        s.ctx,</span><br><span class="line">			ctxDone:    s.ctxDone,</span><br><span class="line">			recv:       s.buf,</span><br><span class="line">			freeBuffer: t.bufferPool.put,</span><br><span class="line">		&#125;,</span><br><span class="line">		windowHandler: func(n int) &#123;</span><br><span class="line">			t.updateWindow(s, uint32(n))</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	// Register the stream with loopy.</span><br><span class="line">	t.controlBuf.put(&amp;registerStream&#123;</span><br><span class="line">		streamID: s.id,</span><br><span class="line">		wq:       s.wq,</span><br><span class="line">	&#125;)</span><br><span class="line">	handle(s)</span><br><span class="line">	return false</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当收到一个Header帧，就表明有新的rpc请求到来，这时候就会解析header帧并创建stream，在创建stream的时候，会把用户自定义的header字段保存到stream.context中</p>
+<p>接下来看一下返回给客户端响应的处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">func (s *Server) sendResponse(t transport.ServerTransport, stream *transport.Stream, msg interface&#123;&#125;, cp Compressor, opts *transport.Options, comp encoding.Compressor) error &#123;</span><br><span class="line">    //反序列化响应消息</span><br><span class="line">	data, err := encode(s.getCodec(stream.ContentSubtype()), msg)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		channelz.Error(s.channelzID, &quot;grpc: server failed to encode response: &quot;, err)</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line">	//压缩</span><br><span class="line">	compData, err := compress(data, cp, comp)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		channelz.Error(s.channelzID, &quot;grpc: server failed to compress response: &quot;, err)</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line">	//创建消息体头部</span><br><span class="line">	hdr, payload := msgHeader(data, compData)</span><br><span class="line">	// TODO(dfawley): should we be checking len(data) instead?</span><br><span class="line">	if len(payload) &gt; s.opts.maxSendMessageSize &#123;</span><br><span class="line">		return status.Errorf(codes.ResourceExhausted, &quot;grpc: trying to send message larger than max (%d vs. %d)&quot;, len(payload), s.opts.maxSendMessageSize)</span><br><span class="line">	&#125;</span><br><span class="line">	//写入stream</span><br><span class="line">	err = t.Write(stream, hdr, payload, opts)</span><br><span class="line">	if err == nil &amp;&amp; s.opts.statsHandler != nil &#123;</span><br><span class="line">		s.opts.statsHandler.HandleRPC(stream.Context(), outPayload(false, msg, data, payload, time.Now()))</span><br><span class="line">	&#125;</span><br><span class="line">	return err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">// Write converts the data into HTTP2 data frame and sends it out. Non-nil error</span><br><span class="line">// is returns if it fails (e.g., framing error, transport error).</span><br><span class="line">func (t *http2Server) Write(s *Stream, hdr []byte, data []byte, opts *Options) error &#123;</span><br><span class="line">//如果Header帧还没发送，先发送HEADER帧</span><br><span class="line">	if !s.isHeaderSent() &#123; // Headers haven&apos;t been written yet.</span><br><span class="line">		if err := t.WriteHeader(s, nil); err != nil &#123;</span><br><span class="line">			if _, ok := err.(ConnectionError); ok &#123;</span><br><span class="line">				return err</span><br><span class="line">			&#125;</span><br><span class="line">			// TODO(mmukhi, dfawley): Make sure this is the right code to return.</span><br><span class="line">			return status.Errorf(codes.Internal, &quot;transport: %v&quot;, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		// Writing headers checks for this condition.</span><br><span class="line">		if s.getState() == streamDone &#123;</span><br><span class="line">			// TODO(mmukhi, dfawley): Should the server write also return io.EOF?</span><br><span class="line">			s.cancel()</span><br><span class="line">			select &#123;</span><br><span class="line">			case &lt;-t.done:</span><br><span class="line">				return ErrConnClosing</span><br><span class="line">			default:</span><br><span class="line">			&#125;</span><br><span class="line">			return ContextErr(s.ctx.Err())</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	// Add some data to header frame so that we can equally distribute bytes across frames.</span><br><span class="line">	emptyLen := http2MaxFrameLen - len(hdr)</span><br><span class="line">	if emptyLen &gt; len(data) &#123;</span><br><span class="line">		emptyLen = len(data)</span><br><span class="line">	&#125;</span><br><span class="line">	hdr = append(hdr, data[:emptyLen]...)</span><br><span class="line">	data = data[emptyLen:]</span><br><span class="line">	//构造数据DATA帧</span><br><span class="line">	df := &amp;dataFrame&#123;</span><br><span class="line">		streamID:    s.id,</span><br><span class="line">		h:           hdr,</span><br><span class="line">		d:           data,</span><br><span class="line">		onEachWrite: t.setResetPingStrikes,</span><br><span class="line">	&#125;</span><br><span class="line">	if err := s.wq.get(int32(len(hdr) + len(data))); err != nil &#123;</span><br><span class="line">		select &#123;</span><br><span class="line">		case &lt;-t.done:</span><br><span class="line">			return ErrConnClosing</span><br><span class="line">		default:</span><br><span class="line">		&#125;</span><br><span class="line">		return ContextErr(s.ctx.Err())</span><br><span class="line">	&#125;</span><br><span class="line">	//将DATA帧加入到发送队列</span><br><span class="line">	return t.controlBuf.put(df)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang-RPC/" rel="tag"># Golang RPC</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/09/grpc-go 客户端invoke调用源码分析/" rel="next" title="grpc-go 客户端invoke调用源码分析">
+                <i class="fa fa-chevron-left"></i> grpc-go 客户端invoke调用源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.jpg"
+                alt="BansheeLW" />
+            
+              <p class="site-author-name" itemprop="name">BansheeLW</p>
+              <p class="site-description motion-element" itemprop="description">太阳落山了，我是你的渔船，你的锚</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#实例化server"><span class="nav-number">1.</span> <span class="nav-text">实例化server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将注册服务对象注册进server"><span class="nav-number">2.</span> <span class="nav-text">将注册服务对象注册进server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#server开始监听并接收请求"><span class="nav-number">3.</span> <span class="nav-text">server开始监听并接收请求</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BansheeLW</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

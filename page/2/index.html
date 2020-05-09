@@ -262,6 +262,678 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/27/leetcode-98之验证二叉搜索树/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/03/27/leetcode-98之验证二叉搜索树/" itemprop="url">leetcode-98之验证二叉搜索树</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-27T19:01:58+08:00">
+                2019-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/leetcode/" itemprop="url" rel="index">
+                    <span itemprop="name">leetcode</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>二叉搜索树（Binary Search Tree)也叫二叉查找树。</p>
+<p>给定一个二叉树，判断其是否是一个有效的二叉搜索树。</p>
+<p>假设一个二叉搜索树具有如下特征：</p>
+<ul>
+<li>节点的左子树只包含小于当前节点的数。</li>
+<li>节点的右子树只包含大于当前节点的数。</li>
+<li>所有左子树和右子树自身必须也是二叉搜索树。</li>
+</ul>
+<p>示例 1:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">输入:</span><br><span class="line">    2</span><br><span class="line">   / \</span><br><span class="line">  1   3</span><br><span class="line">输出: true</span><br></pre></td></tr></table></figure></p>
+<p>示例 2：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">输入:</span><br><span class="line">    5</span><br><span class="line">   / \</span><br><span class="line">  1   4</span><br><span class="line">     / \</span><br><span class="line">    3   6</span><br><span class="line">输出: false</span><br><span class="line">解释: 输入为: [5,1,4,null,null,3,6]。</span><br><span class="line">     根节点的值为 5 ，但是其右子节点值为 4 。</span><br></pre></td></tr></table></figure></p>
+<h4 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h4><p>利用二叉搜索树中序遍历得到是一个升序数组的特点，使用一个全局变量记录前一个节点，递归与当前节点比较，如果都比当前节点小，那么就是一个二叉搜索树</p>
+<h4 id="golang-实现"><a href="#golang-实现" class="headerlink" title="golang 实现"></a>golang 实现</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">type TreeNode struct &#123;</span><br><span class="line">	Val   int</span><br><span class="line">	Left  *TreeNode</span><br><span class="line">	Right *TreeNode</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func isValidBST(root *TreeNode) bool &#123;</span><br><span class="line">	prev = nil</span><br><span class="line">	return helper(root)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var prev *TreeNode</span><br><span class="line"></span><br><span class="line">func helper(root *TreeNode) bool &#123;</span><br><span class="line">	if root == nil &#123;</span><br><span class="line">		return true</span><br><span class="line">	&#125;</span><br><span class="line">	if helper(root.Left) == false &#123;</span><br><span class="line">		return false</span><br><span class="line">	&#125;</span><br><span class="line">	if prev != nil &amp;&amp; prev.Val &gt;= root.Val &#123;</span><br><span class="line">		return false</span><br><span class="line">	&#125;</span><br><span class="line">	prev = root</span><br><span class="line">	return helper(root.Right)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/27/CPU上下文切换/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/03/27/CPU上下文切换/" itemprop="url">CPU上下文切换</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-27T14:54:05+08:00">
+                2019-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>多个进程竞争CPU的时候并没有真正运行，为什么还会导致系统负载的升高呢？CPU上下文切换就是罪魁祸首</p>
+<p>Linux是个多任务操作系统，多个任务并发执行并不是同时执行，而是系统将CPU轮流分配给这些任务，造成多任务同时运行的错觉。</p>
+<p>而每个任务运行前，CPU需要知道任务从哪里加载，又从哪里开始运行，也就是说，需要系统帮他设置好CPU寄存器和程序计数器，他们都是CPU在运行任何任务之前，必须的依赖环境，因此也被叫做CPU上下文。</p>
+<p>CPU上下文切换，就是把前一个CPU的上下文（CPU寄存器和程序计数器）保存起来，然后加载新任务的上下文到这些寄存器和程序计数器，最后再跳转到程序计数器所指向的新位置，开始运行新的任务。</p>
+<p>而这些保存起来的上下文，会存储在系统内核中，并在任务重新调度执行时再次加载进来，这样就能保证任务原来的状态不受影响，让任务看起来是连续运行的。</p>
+<blockquote>
+<p>操作系统管理的这些“任务”到底是什么？</p>
+</blockquote>
+<p>任务就只是进程或线程吗？其实不止，硬件通过触发信号，会导致中断处理程序的调用，这也是一种常见的任务。</p>
+<p>所以，根据任务的不同，CPU上下文切换可以分为几个不同的场景：</p>
+<ul>
+<li>进程上下文切换</li>
+<li>线程上下文切换</li>
+<li>中断上下文切换</li>
+</ul>
+<h4 id="进程上下文切换"><a href="#进程上下文切换" class="headerlink" title="进程上下文切换"></a>进程上下文切换</h4><p>Linux按照特权等级，把进程的运行空间分为内核空间和用户空间</p>
+<ul>
+<li>内核空间（Ring 0)具有最高权限，可以直接访问所有资源；</li>
+<li>用户空间（Ring 3) 只能访问受限资源，不能访问内存等硬件设备，必须通过系统调用陷入内核中，才能访问这些特权资源。</li>
+</ul>
+<p>系统调用过程中，发生了CPU上下文切换（CPU寄存器里原来用户态的指令，需要先保存起来。接着，为了执行内核态代码，CPU寄存器需要更新为内核态指令的新位置，最后才是跳转到内核态运行内核任务。而系统调用结束后，CPU寄存器需要回复原来保存的用户态，然后再切换到用户空间，继续运行。所以，一次系统调用发生了两次CPU上下文切换）</p>
+<blockquote>
+<p>那么，进程上下文切换与系统调用又有什么区别呢？</p>
+</blockquote>
+<p>进程是由内核来管理和调度的，进程的切换只能发生在内核态。所以，进程的上下文仅包括了虚拟内存、栈、全局变量等用户空间的资源，还包括了内核堆栈、寄存器等内核空间的状态。</p>
+<p>因此，进程的上下文切换就比系统调用多了一步：在保存当前进程的内核状态和寄存器之前，需要先把该进程的虚拟内存、栈等保存下来；而加载了下一进程的内核态后，还需要刷新进程的虚拟内存和用户态。</p>
+<p>进程上下文的频繁切换，导致CPU将大量的时间耗费在寄存器、内核栈以及虚拟内存等资源的保护和恢复上，进而大大缩短了真正运行进程的时间。</p>
+<blockquote>
+<p>什么时候才会发生进程上下文切换？</p>
+</blockquote>
+<p>进程切换时才需要切换进程上下文（即只有在进程调度时，才需要切换进程上下文）</p>
+<p>Liunx为每个CPU都维护了一个就绪队列，将活跃进程（也就是正在运行和正在等待CPU的进程）按照优先级及等待CPU的时间排序，然后选择最需要CPU的进程，也就是优先级最高和等待CPU时间最长的进程来运行。</p>
+<blockquote>
+<p>进程在什么时候才会被调度到CPU上运行？</p>
+</blockquote>
+<ul>
+<li>进程执行完终止，它占用的CPU资源会被释放，从就绪队列出拿出一个新进程过来运行</li>
+<li>为了保证所有进程都能得到公平调度，CPU时间被划分为一段段的时间片，这些时间片再被轮流分配给各个进程。这样，当某个进程的时间片耗尽，就会被系统挂起，切换到其它正在等待CPU运行的进程运行。</li>
+<li>进程在系统资源不足（内存不足）时，要等到资源满足后才能继续运行，这个时候进程也会被挂起，并由系统调度其它进程运行</li>
+<li>当进程通过睡眠函数sleep()这样的方式将自己主动挂起时，自然也会重新调度</li>
+<li>当有优先级更高的进程运行时，为了保证高优先进程的运行，当前进程会被挂起，由高优先级进程来运行</li>
+<li>发生硬件中断时，CPU上的进程会被中断挂起，转而执行内核中的终端服务程序</li>
+</ul>
+<h4 id="线程上下文切换"><a href="#线程上下文切换" class="headerlink" title="线程上下文切换"></a>线程上下文切换</h4><p>线程与进程的最大区别在于：线程是调度的基本单位，进程是资源拥有的基本单位。所谓内核中的任务调度，实际调度的对象是线程；而进程给线程提供了虚拟内存、全局变量等资源。</p>
+<ul>
+<li>当进程只有一个线程时，可以认为进程就等于线程</li>
+<li>当进程拥有多个线程时，这些线程会共享虚拟内存和全局变量等资源，这些资源在线程上下文切换时是不需要修改的。</li>
+<li>线程也有自己的私有数据，比如栈和寄存器等，这些在线程上下文切换时也是需要保存的</li>
+</ul>
+<p>因此，线程上下文的切换也就有以下两种情况：</p>
+<ol>
+<li>同一进程内的线程上下文切换，因为虚拟内存是共享的额，在切换时不需要修改，只需要切换线程的私有数据、寄存器等不共享的数据</li>
+<li>不同进程的线程切换，这就跟进程上下文切换是一样的额</li>
+</ol>
+<h4 id="中断上下文切换"><a href="#中断上下文切换" class="headerlink" title="中断上下文切换"></a>中断上下文切换</h4><p>为了快速响应硬件的事件，中断处理会打断进程的正常调度和执行，转而调用中断处理程序，响应设备事件。而在打断其他进程时，就需要将进程当前的状态保存下来，这样在中断结束后，进程仍然可已从原来的状态恢复运行。</p>
+<p>跟进程_上下文不同，中断上下文切换并不涉及到进程的用户态。所以，即便中断过程打断了一个正处在用户态的进程，也不需要保存和恢复这个进程的虚拟内存、全局变量等用户态资源。中断上下文，其实只包括内核态中断服务程序执行所必需的状态，包括CPU寄存器、内核堆栈、硬件中断参数等。</p>
+<p>对同一个CPU来说，中断处理比进程拥有更高的优先级，所以中断上下文切换并不会与进程上下文切换同时发生。同样道理，由于中断会打断正常进程的调度和执行，所以大部分中断处理程序都短小精悍，以便尽可能快的执行结束。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/26/理解Linux软中断/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/03/26/理解Linux软中断/" itemprop="url">理解Linux软中断</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-26T14:51:07+08:00">
+                2019-03-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>中断：中断是系统用来响应硬件设备请求的一种机制，它会打断进程的正常执行和调度，然后调用内核中的中断处理程序来响应设备的请求。</p>
+<p>中断的形象化描述：取外卖场景</p>
+<p> 1.中断是一种异步的事件处理机制，能提高系统的并发处理能力</p>
+<p> 2.为了减少对正常进程运行进行影响，中断处理程序需要尽快运行</p>
+<p> 3.中断分为，上下两个部分</p>
+<pre><code>(1)上半部用来快速处理中断，在中断禁止模式下，主要处理跟硬件紧密相关的或时间敏感的工作
+(2)下半部用来延迟处理上半部未完成的工作，通常以内核线程的方式运行。
+</code></pre><p>小结:</p>
+<ul>
+<li>上半部直接处理硬件请求，即硬中断，特点是快速执行</li>
+<li>下半部由内核触发，即软中断，特点是延迟执行</li>
+</ul>
+<p>实际上，上半部会打断CPU正在执行的任务，然后立即执行终端处理程序。而下半部分以内核线程的方式执行，并且每个CPU都对应一个软中断内核线程，名为“ksoftirq/cpu编号”。</p>
+<p>软中断除了硬件设备中断处理程序的下半部分，还包括一些内核自定义的事件，如:内核调度RCU锁</p>
+<p> 4.proc文件系统是一种内核空间和用户空间进行通信的机制，可以用来查看内核的数据结构或者用来动态修改内核配置，如:</p>
+<ul>
+<li>/proc/softirqs提供软中断的运行情况</li>
+<li>/proc/interrupts提供硬中断的运行情况</li>
+</ul>
+<h4 id="辅助案例加深理解"><a href="#辅助案例加深理解" class="headerlink" title="辅助案例加深理解"></a>辅助案例加深理解</h4><h5 id="例子-网卡接收数据包"><a href="#例子-网卡接收数据包" class="headerlink" title="例子:网卡接收数据包"></a>例子:网卡接收数据包</h5><p>网卡接收到数据包后，会通过硬件中断的方式，通知内核有新的数据到了。这时，内核就会调用中断处理程序来响应它。</p>
+<p>在这个案例中，上半部和下半部负责的工作：</p>
+<ul>
+<li>上半部：既然是快速处理，其实就是要把网卡的数据读到内存中，然后更新一下硬件寄存器的状态（表示数据已经读好了），最后再发送一个软中断信息，通知下半部做进一步处理了。</li>
+<li>下半部：被软中断唤醒后，需要从内存中找到网络数据，再按照网络协议栈，对数据进程逐层解析和处理，直到把它送给应用程序。</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/26/文件系统与磁盘的区别/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/03/26/文件系统与磁盘的区别/" itemprop="url">文件系统与磁盘的区别</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-26T12:01:34+08:00">
+                2019-03-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>磁盘是一个存储设备（切确的说是块设备），可以被划分为不同的磁盘分区。而在磁盘或者说磁盘分区上，还可以创建文件系统，并挂载到系统的某个目录中。这样，系统就可以通过这个挂载目录，来读写文件。</p>
+<p>磁盘是存储数据的块设备，也是文件系统的载体。所以，文件系统其实还是需要通过磁盘来保证数据的持久化存储。</p>
+<p>Linux中一切皆文件，可以通过相同的文件接口，来访问磁盘和文件（比如 open,read,write,close等）</p>
+<ul>
+<li>我们常说的“文件”，其实指的是普通文件</li>
+<li>而磁盘或者分区，则是指块设备文件</li>
+</ul>
+<p>在读写普通文件时，I/O请求会首先通过文件系统，然后有文件系统负责与磁盘进行交互。而在读写块设备时，会跳过文件系统，直接与磁盘交互，即所谓的“裸I/O”。</p>
+<p>这两种读写方式使用的缓存自然不同。文件系统管理的缓存，其实就是Cache的一部分。而裸磁盘的缓存，用的是Buffer.</p>
+<p>用ls -l命令查看 /dev 目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">//块设备文件</span><br><span class="line">-Port</span><br><span class="line">brw-r-----  1 root     operator         1,   0  2 13 10:13 disk0</span><br><span class="line"></span><br><span class="line">//字符设备文件</span><br><span class="line">crw-------  1 root     wheel           18,   1  3 25 10:28 afsc_type5</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>b（block） 表示块设备文件，一般置于/dev目录下，一次传输数据为一整块的设备，如硬盘、光盘。最小数据传输单位为一个数据块（通常一个数据块的大小为 512 字节）</li>
+<li>c (character)字符设备文件，一般置于/dev目录下，一次传输一个字节的设备，如字符终端，键盘等，传输数据的最小单位为一个字节。</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/22/MySQL数据类型补充/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -915,7 +1587,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">18</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -926,7 +1598,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -937,7 +1609,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
