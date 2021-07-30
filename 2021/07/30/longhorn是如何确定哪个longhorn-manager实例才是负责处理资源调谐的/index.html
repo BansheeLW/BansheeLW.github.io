@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="存储 longhorn," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="以volume create 为例volumen 资源创建后，volume Informer watch 到资源变化，volume controller 的worker 开始处理，因为longhorn-manager 实例有多个，也就意味着informer有多个，那么，究竟是哪个manager的informer才是处理某次资源变化的负责人呢？ 代码探析：==controller/volume_co">
+<meta name="keywords" content="存储 longhorn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="longhorn是如何确定哪个longhorn-manager实例才是负责处理资源调谐的">
+<meta property="og:url" content="http://yoursite.com/2021/07/30/longhorn是如何确定哪个longhorn-manager实例才是负责处理资源调谐的/index.html">
+<meta property="og:site_name" content="厦门鱼肝油厂">
+<meta property="og:description" content="以volume create 为例volumen 资源创建后，volume Informer watch 到资源变化，volume controller 的worker 开始处理，因为longhorn-manager 实例有多个，也就意味着informer有多个，那么，究竟是哪个manager的informer才是处理某次资源变化的负责人呢？ 代码探析：==controller/volume_co">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-07-30T02:07:26.125Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="longhorn是如何确定哪个longhorn-manager实例才是负责处理资源调谐的">
+<meta name="twitter:description" content="以volume create 为例volumen 资源创建后，volume Informer watch 到资源变化，volume controller 的worker 开始处理，因为longhorn-manager 实例有多个，也就意味着informer有多个，那么，究竟是哪个manager的informer才是处理某次资源变化的负责人呢？ 代码探析：==controller/volume_co">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"right","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2021/07/30/longhorn是如何确定哪个longhorn-manager实例才是负责处理资源调谐的/"/>
+
+
+
+
+
+  <title>longhorn是如何确定哪个longhorn-manager实例才是负责处理资源调谐的 | 厦门鱼肝油厂</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail">
+    <div class="headband"></div>
+          <a href="https://github.com/BansheeLW"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_green_007200.png" alt="Fork me on GitHub"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">厦门鱼肝油厂</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/07/30/longhorn是如何确定哪个longhorn-manager实例才是负责处理资源调谐的/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="BansheeLW">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="厦门鱼肝油厂">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">longhorn是如何确定哪个longhorn-manager实例才是负责处理资源调谐的</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-30T10:06:34+08:00">
+                2021-07-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="以volume-create-为例"><a href="#以volume-create-为例" class="headerlink" title="以volume create 为例"></a>以volume create 为例</h4><p>volumen 资源创建后，volume Informer watch 到资源变化，volume controller 的worker 开始处理，因为longhorn-manager 实例有多个，也就意味着informer有多个，那么，究竟是哪个manager的informer才是处理某次资源变化的负责人呢？</p>
+<h5 id="代码探析："><a href="#代码探析：" class="headerlink" title="代码探析："></a>代码探析：</h5><p>==controller/volume_controller.go==<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 当前的节点 manager 是否负责运行sync逻辑</span><br><span class="line">isResponsible, err := vc.isResponsibleFor(volume, defaultEngineImage)</span><br><span class="line">if err != nil &#123;</span><br><span class="line">	return err</span><br><span class="line">&#125;</span><br><span class="line">if !isResponsible &#123;</span><br><span class="line">	return nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们查看下 isResponsibleFor 方法的逻辑，代码省略了判错及一些不影响主流程阅读的内容</p>
+<p>==controller/volume_controller.go==<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">// isResponsibleFor picks a running node that has the default engine image deployed.</span><br><span class="line">// We need the default engine image deployed on the node to perform operation like backup operations.</span><br><span class="line">// Prefer picking the node v.Spec.NodeID if it meet the above requirement. 如果满足上述要求，则优先选择节点 v.Spec.NodeID</span><br><span class="line">func (vc *VolumeController) isResponsibleFor(v *longhorn.Volume, defaultEngineImage string) (bool, error) &#123;</span><br><span class="line">	var err error</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	isResponsible := isControllerResponsibleFor(vc.controllerID, vc.ds, v.Name, v.Spec.NodeID, v.Status.OwnerID)</span><br><span class="line"></span><br><span class="line">	// No node in the system has the default engine image,</span><br><span class="line">	// Fall back to the default logic where we pick a running node to be the owner</span><br><span class="line">	if len(readyNodesWithDefaultEI) == 0 &#123;</span><br><span class="line">		return isResponsible, nil</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	preferredOwnerEngineAvailable, err := vc.ds.CheckEngineImageReadiness(defaultEngineImage, v.Spec.NodeID)</span><br><span class="line"></span><br><span class="line">	currentOwnerEngineAvailable, err := vc.ds.CheckEngineImageReadiness(defaultEngineImage, v.Status.OwnerID)</span><br><span class="line">	</span><br><span class="line">	currentNodeEngineAvailable, err := vc.ds.CheckEngineImageReadiness(defaultEngineImage, vc.controllerID)</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	// 如果当前节点engine不可用，那么就不负责处理了</span><br><span class="line">	// 当前节点engine可用 &amp;&amp; （最优、继续、需要新的，都是当前节点）</span><br><span class="line">	isPreferredOwner := currentNodeEngineAvailable &amp;&amp; isResponsible</span><br><span class="line"></span><br><span class="line">	// （当前那节点engine可用 &amp;&amp; 最优节点engine 不可用 &amp;&amp; 当前控制器就是的节点就是之前的owner节点） 继续当前节点</span><br><span class="line">	continueToBeOwner := currentNodeEngineAvailable &amp;&amp; !preferredOwnerEngineAvailable &amp;&amp; vc.controllerID == v.Status.OwnerID</span><br><span class="line"></span><br><span class="line">	// （当前那节点engine可用 &amp;&amp; 最优节点engine 不可用 &amp;&amp; owner节点不engine不可用） 选择当前节点</span><br><span class="line">	requiresNewOwner := currentNodeEngineAvailable &amp;&amp; !preferredOwnerEngineAvailable &amp;&amp; !currentOwnerEngineAvailable</span><br><span class="line"></span><br><span class="line">	return isPreferredOwner || continueToBeOwner || requiresNewOwner, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们继续看下 isControllerResponsibleFor,这个函数是longhorn-manager 资源用来判断当前 manager是否负责处理 sync 逻辑的 通用函数<br>==controller/controller_manager.go==</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">// 挑选指导原则：优先 Spec.NodeId，优先最优节点</span><br><span class="line">func isControllerResponsibleFor(controllerID string, ds *datastore.DataStore, name, preferredOwnerID, currentOwnerID string) bool &#123;</span><br><span class="line">	// we use this approach so that if there is an issue with the data store</span><br><span class="line">	// we don&apos;t accidentally transfer ownership</span><br><span class="line">	isOwnerUnavailable := func(node string) bool &#123;</span><br><span class="line">		isUnavailable, err := ds.IsNodeDownOrDeletedOrMissingManager(node)</span><br><span class="line">		if node != &quot;&quot; &amp;&amp; err != nil &#123;</span><br><span class="line">			logrus.Errorf(&quot;Error while checking IsNodeDownOrDeletedOrMissingManager for object %v, node %v: %v&quot;, name, node, err)</span><br><span class="line">		&#125;</span><br><span class="line">		return node == &quot;&quot; || isUnavailable</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	// 当前节点是最优节点</span><br><span class="line">	isPreferredOwner := controllerID == preferredOwnerID</span><br><span class="line">	// owner节点是当前节点，且最优节点不可用，那么还是用当前owner节点</span><br><span class="line">	continueToBeOwner := currentOwnerID == controllerID &amp;&amp; isOwnerUnavailable(preferredOwnerID)</span><br><span class="line">	// owner节点不可用，最优节点不可用，需要新节点</span><br><span class="line">	requiresNewOwner := isOwnerUnavailable(currentOwnerID) &amp;&amp; isOwnerUnavailable(preferredOwnerID)</span><br><span class="line">	return isPreferredOwner || continueToBeOwner || requiresNewOwner</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h4><p>通过以上代码，我们可以总结出：lognhorn-manager 实例主要是判断当前节点是否可负责处理sync逻辑，而判断能否使用当前节点：</p>
+<p>最优先条件是当前节点是 perfer(最优节点，perfer的值一般是 xx.Spec.NodeID)</p>
+<p>其次是当前节点就是owner节点</p>
+<p>最次是最优节点及owner节点都不可用了，那么就使用当前节点</p>
+<p>可以看出，节点的挑选最终的优化方向是往 “资源.Spec.NodeId 是哪个，那么就由这个期望的node上的manager来处理”</p>
+<p>==注：voulume contoller 这一块加入了 节点engineImage 的判断，与其他资源（例：replica）有些不同，但核心的处理逻辑还是一致的==</p>
+<p>（最优不可用，Owner不可用），两个或多个节点都获取到了负责权，这种情况下，是通过 更新 Status.OwnerID，通过 k8s 的版本冲突机制来保证只有最先更新的manager获得处理权，即这一段代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">// 这里是 让哪个 vc instance 来处理 volume，如果是volume create，那就是第一个update 的 vc 获取处理权</span><br><span class="line">// 如果只是 volume （update等）其他操作，也是谁先更新谁获得处理权</span><br><span class="line">if volume.Status.OwnerID != vc.controllerID &#123;</span><br><span class="line">	volume.Status.OwnerID = vc.controllerID</span><br><span class="line">	volume, err = vc.ds.UpdateVolumeStatus(volume)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		// we don&apos;t mind others coming first</span><br><span class="line">		if apierrors.IsConflict(errors.Cause(err)) &#123;</span><br><span class="line">			return nil</span><br><span class="line">		&#125;</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line">	log.Debugf(&quot;Volume got new owner %v&quot;, vc.controllerID)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/存储-longhorn/" rel="tag"># 存储 longhorn</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/07/30/longhron磁盘发现机制探索/" rel="next" title="longhron磁盘发现机制探索">
+                <i class="fa fa-chevron-left"></i> longhron磁盘发现机制探索
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/avatar.jpg"
+                alt="BansheeLW" />
+            
+              <p class="site-author-name" itemprop="name">BansheeLW</p>
+              <p class="site-description motion-element" itemprop="description">太阳落山了，我是你的渔船，你的锚</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#以volume-create-为例"><span class="nav-number">1.</span> <span class="nav-text">以volume create 为例</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#代码探析："><span class="nav-number">1.1.</span> <span class="nav-text">代码探析：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结："><span class="nav-number">2.</span> <span class="nav-text">总结：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BansheeLW</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
